@@ -3,30 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- SEO: description & keywords -->
+  <meta name="description" content="Visited Countries — A personal travel journal to track countries visited, log trips with dates, ratings, duration and notes, and attach photos. Upload and manage photos, export/import your data, and track progress on the road to visit all countries. Country tracker, travel journal with photos, countries visited tracker and visited countries list — and much more." />
+  <meta name="keywords" content="travel journal, visited countries, country tracker, travel journal with photos, countries visited tracker, visited countries list, track trips, road to visit all countries, travel photos, trip tracker, travel log" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#161129" />
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Visited Countries - Your Travel Journal" />
+  <meta property="og:description" content="A personal travel journal to track countries visited, log trips with notes, ratings, duration and photos. Export/import data and follow your progress on the road to visit all countries." />
+  <meta property="og:image" content="image.png" />
+  <meta property="og:image:alt" content="Visited Countries – travel journal with photos" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Visited Countries - Your Travel Journal" />
+  <meta name="twitter:description" content="Track your visits, add trip notes and photos, and export your travel journal. Road to visit all countries — log every trip and photo." />
+  <meta name="twitter:image" content="image.png" />
+  <!-- Structured data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Visited Countries - Your Travel Journal",
+    "description": "A personal travel journal to track countries visited, log trips with dates, ratings, duration and notes, and attach photos. Export/import your data and track progress toward visiting all countries.",
+    "image": "image.png"
+  }
+  </script>
   <title>Visited Countries - Your Travel Journal</title>
   <link id="favicon" rel="icon" href="">
   <style>
     :root{
-      /* lightened palette (subtle shift towards brighter tones) */
-      --bg: #161129;        /* slightly lighter page background */
+      --bg: #161129;
       --bg-2: #1b1632;
-      --card: #2f275f;      /* lighter card base */
-      --card-2:#332e6d;     /* lighter card gradient */
-      --text:#f7f7fb;       /* slightly brighter text */
-      --muted:#d6d0f5;      /* softer muted text */
-      --purple:#8b5cf6;     /* lighter primary */
+      --card: #2f275f;
+      --card-2:#332e6d;
+      --text:#f7f7fb;
+      --muted:#d6d0f5;
+      --purple:#8b5cf6;
       --purple-700:#7c3aed;
       --accent:#c4b5fd;
-      --green:#9ef0c5;      /* softer visited green */
-      --danger:#ef6666;     /* slightly brighter danger */
+      --green:#9ef0c5;
+      --danger:#ef6666;
       --warning:#f6a94a;
-      --shadow: 0 8px 20px rgba(0,0,0,.18); /* lighter shadow */
-      --not-visited: #42507a; /* clearer, distinct not-visited color */
+      --shadow: 0 8px 20px rgba(0,0,0,.18);
+      --not-visited: #42507a;
     }
     html,body{height:100%}
     body{
       margin:0;
-      /* increased lightness in the background gradients */
       background:
         radial-gradient(1200px 800px at 18% -18%, rgba(139,92,246,.22), transparent 60%),
         radial-gradient(1000px 600px at 110% 18%, rgba(196,181,253,.16), transparent 55%),
@@ -59,37 +83,19 @@
     button:active{transform: translateY(1px)}
     .danger{background: var(--danger)}
 
-    /* Layout */
     .app{max-width:1200px; margin:18px auto; padding:0 16px; display:grid; grid-template-columns: 1.6fr .9fr; gap:18px}
     .panel{background: linear-gradient(180deg, var(--card), var(--card-2)); border:1px solid rgba(167,139,250,.12); border-radius:16px; box-shadow: var(--shadow)}
     .panel h2{margin:0; padding:14px 16px; border-bottom:1px solid rgba(167,139,250,.09); font-size:16px; letter-spacing:.3px}
-    /* help button */
     .help-btn{
-      margin-left:8px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:34px;
-      height:34px;
-      padding:6px;
-      border-radius:8px;
-      background: rgba(255,255,255,.04);
-      color:var(--text);
-      border:1px solid rgba(167,139,250,.06);
-      cursor:pointer;
-      box-shadow: var(--shadow);
-      font-size:14px;
+      margin-left:8px; display:inline-flex; align-items:center; justify-content:center;
+      width:34px; height:34px; padding:6px; border-radius:8px; background: rgba(255,255,255,.04);
+      color:var(--text); border:1px solid rgba(167,139,250,.06); cursor:pointer; box-shadow: var(--shadow); font-size:14px;
     }
     .help-btn:hover{ background: rgba(255,255,255,.06) }
     dialog.help-dialog{ padding:14px; max-width:520px; }
     dialog.help-dialog .title{ font-weight:700; margin-bottom:8px }
-    .content {
-      padding: 16px;
-      border-top: 1px solid rgba(167,139,250,.09);
-      border-bottom: 1px solid rgba(167,139,250,.09);
-    }
-    /* Map */
-    #map{ width:100%; height:min(70vh, 680px); touch-action: none; cursor: grab; } /* enable touch gestures and show grab cursor */
+    .content { padding: 16px; border-top: 1px solid rgba(167,139,250,.09); border-bottom: 1px solid rgba(167,139,250,.09); }
+    #map{ width:100%; height:min(70vh, 680px); touch-action: none; cursor: grab; }
     .map-wrap{ position:relative; }
     .map-legend{ position:absolute; right:10px; bottom:10px; background: rgba(21,16,42,.78); border:1px solid rgba(167,139,250,.14); border-radius:12px; padding:10px 12px; font-size:12px}
     .map-legend .swatch{ display:inline-block; width:14px; height:10px; border-radius:3px; margin-right:6px; vertical-align:middle }
@@ -98,38 +104,22 @@
     .country:hover{ fill:#4a3a9a }
     .country.visited{ fill:var(--green); stroke:#43b686 }
 
-    /* Sidebar cards */
     .card{ background: linear-gradient(180deg, #352b6f, #2b2459); border:1px solid rgba(167,139,250,.12); border-radius:16px; padding:12px; margin:10px 0; box-shadow: var(--shadow)}
     .card .meta{ font-size:12px; color: var(--muted) }
     .card .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
     .badge{ background: rgba(139,92,246,.16); color:#f3edff; border:1px solid rgba(139,92,246,.22); padding:4px 8px; border-radius:999px; font-size:12px }
     .rating{ background: rgba(158,240,197,.12); color:#e9fff0; border:1px solid rgba(158,240,197,.18) }
 
-    /* Trip Editor (modal) */
     dialog{ background: linear-gradient(180deg, #332861, #2d2552); color:var(--text); border:1px solid rgba(167,139,250,.18); border-radius:16px; box-shadow: var(--shadow); width:min(520px, 92vw) }
     dialog::backdrop{ background: rgba(12,9,26,.54); backdrop-filter: blur(3px) }
-    /* Grid: three columns on wide screens, two on medium, one on small */
-    form .grid{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:10px;
-      align-items:start;
-    }
-    /* medium screens: two columns to avoid cramped inputs */
-    @media (max-width: 760px){
-      form .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    /* small screens: stack */
-    @media (max-width: 560px){
-      form .grid{ grid-template-columns: 1fr }
-    }
-    /* ensure each grid cell can shrink and inputs don't overflow */
+    form .grid{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:10px; align-items:start; }
+    @media (max-width: 760px){ form .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px){ form .grid{ grid-template-columns: 1fr } }
     form .grid > div{ min-width: 0; }
     label{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px }
-    /* use box-sizing so padding doesn't add to width; reduce padding slightly to fit */
     input[type="text"], input[type="date"], input[type="number"], textarea, select{
-      box-sizing: border-box;
-      width:100%; background:#1e1738; color:var(--text); border:1px solid rgba(167,139,250,.12); border-radius:12px; padding:8px; outline:none;
+      box-sizing: border-box; width:100%; background:#1e1738; color:var(--text); border:1px solid rgba(167,139,250,.12);
+      border-radius:12px; padding:8px; outline:none;
     }
     textarea{ min-height:90px; resize:vertical }
 
@@ -139,7 +129,6 @@
 
     .empty{ opacity:.9; text-align:center; padding:20px; color:var(--muted) }
 
-    /* Mobile */
     .mobile-actions{ display:none }
     @media (max-width: 960px){
       .app{ grid-template-columns: 1fr; }
@@ -149,80 +138,19 @@
       #map{ height: 64vh }
     }
 
-    /* Prevent search input from overflowing the header on small widths */
     .side-header .search { min-width: 0; flex: 1 1 auto; }
     .side-header .search input { min-width: 0; box-sizing: border-box; }
 
-    /* Photo viewer dialog styles (wider / full-viewport friendly) */
-    dialog.photo-viewer {
-      padding:8px;
-      max-width: 98vw;
-      width: 98vw;
-      border-radius:12px;
-      background: linear-gradient(180deg, #1a1430, #130f25);
-    }
+    dialog.photo-viewer { padding:8px; max-width: 98vw; width: 98vw; border-radius:12px; background: linear-gradient(180deg, #1a1430, #130f25); }
     dialog.photo-viewer::backdrop { background: rgba(0,0,0,0.7); }
-    .pv-inner {
-      position:relative;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      width:100%;
-      height: calc(80vh);
-      overflow:hidden;
-    }
-    dialog.photo-viewer img {
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      display:block;
-      user-select:none;
-      -webkit-user-drag: none;
-    }
-    .pv-nav {
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      width:40px;
-      height:40px;
-      border-radius:50%;
-      background: rgba(0,0,0,0.35);
-      border:0;
-      color:white;
-      display:grid;
-      place-items:center;
-      cursor:pointer;
-      z-index:30;
-    }
+    .pv-inner { position:relative; display:flex; align-items:center; justify-content:center; width:100%; height: calc(80vh); overflow:hidden; }
+    dialog.photo-viewer img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display:block; user-select:none; -webkit-user-drag: none; }
+    .pv-nav { position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; background: rgba(0,0,0,0.35); border:0; color:white; display:grid; place-items:center; cursor:pointer; z-index:30; }
     .pv-nav:active{ transform: translateY(-50%) scale(.98) }
     .pv-prev { left:10px }
     .pv-next { right:10px }
-    .pv-close {
-      position:absolute;
-      right:10px;
-      top:10px;
-      background: rgba(0,0,0,0.35);
-      border:0;
-      color:white;
-      padding:6px 10px;
-      border-radius:8px;
-      cursor:pointer;
-      z-index:40;
-    }
-    .pv-counter{
-      position:absolute;
-      left:50%;
-      bottom:8px;
-      transform:translateX(-50%);
-      color:var(--muted);
-      font-size:13px;
-      background: rgba(0,0,0,0.32);
-      padding:6px 10px;
-      border-radius:999px;
-      z-index:30;
-    }
+    .pv-close { position:absolute; right:10px; top:10px; background: rgba(0,0,0,0.35); border:0; color:white; padding:6px 10px; border-radius:8px; cursor:pointer; z-index:40; }
+    .pv-counter{ position:absolute; left:50%; bottom:8px; transform:translateX(-50%); color:var(--muted); font-size:13px; background: rgba(0,0,0,0.32); padding:6px 10px; border-radius:999px; z-index:30; }
     @media (max-width: 560px){
       dialog.photo-viewer { padding:6px; }
       .pv-nav { width:34px; height:34px; }
@@ -235,16 +163,13 @@
     <div class="wrap" style="display:flex; gap:14px; align-items:center; flex-wrap:wrap">
       <div class="title">
         <div class="logo" aria-hidden="true">
-          <!-- use provided image.png as the logo -->
           <img src="image.png" alt="World icon" style="width:28px;height:28px;object-fit:contain;display:block;border-radius:8px" />
         </div>
         <div>
           <div style="font-weight:800; letter-spacing:.3px">Visited Countries - Your Travel Journal</div>
         </div>
       </div>
-      <div class="toolbar" style="margin-left:auto">
-        <!-- header toolbar intentionally left minimal; export/import moved to footer -->
-      </div>
+      <div class="toolbar" style="margin-left:auto"></div>
     </div>
   </header>
 
@@ -253,7 +178,6 @@
       <h2 style="display:flex;align-items:center;gap:8px">
         <span>World Map - click a country and add your memories including photos</span>
         <button id="helpBtn" class="help-btn" aria-label="How this works" title="How this works">
-          <!-- Info icon (local file) -->
           <img src="info-icon.png" alt="Info" style="width:16px;height:16px;display:block" />
         </button>
       </h2>
@@ -294,19 +218,17 @@
           <label for="tripRating">Rating (1–10)</label>
           <input type="number" id="tripRating" min="1" max="10" value="7" required>
         </div>
-        <!-- added duration input -->
         <div>
           <label for="tripDays">Duration (days)</label>
           <input type="number" id="tripDays" min="1" value="1" required>
         </div>
       </div>
 
-      <!-- Photos section: upload + previews -->
       <div style="margin-top:10px">
         <label for="tripPhoto">Photos</label>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="file" id="tripPhoto" accept="image/*" multiple>
-          <div style="font-size:12px;color:var(--muted)">Photos are stored locally and included with exported data.</div>
+          <div style="font-size:12px;color:var(--muted)">Photos are stored locally and included with exported data (using IndexedDB under the hood).</div>
         </div>
         <div id="photoPreview" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap"></div>
       </div>
@@ -322,24 +244,24 @@
     </form>
   </dialog>
 
-  <!-- Help dialog: persistent, open any time -->
+  <!-- Help dialog -->
   <dialog id="helpDialog" class="help-dialog">
     <div class="title">How to use Visited Countries</div>
     <div style="font-size:13px; color:var(--muted); margin-bottom:10px">
       - Click a country on the map to add a trip (date, rating, duration, notes).<br>
       - You can add multiple visits for the same country.<br>
-      - Upload photos for each trip (stored locally to your browser and included when you export data).<br>
+      - Upload photos for each trip; they’re stored locally (IndexedDB) and included when you Export.<br>
       - Use Export to download your data as JSON and Import to restore it on any device.<br>
       - Use the sidebar search to find trips by country or notes.<br>
-      - Clear removes all stored trips and photos from browser data.<br>
-      - Data is stored in your browser's localStorage and persists until you clear it or the browser removes it (e.g. clearing cache); export regularly to back up your trips.
+      - Clear removes all stored trips and photos from your browser.<br>
+      - Data persists in your browser until you clear it; export regularly to back up your trips.
     </div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button id="closeHelp" class="ghost" type="button">Close</button>
     </div>
   </dialog>
 
-  <!-- Photo viewer (replaced with carousel + nav; removed "open in new tab") -->
+  <!-- Photo viewer -->
   <dialog id="photoViewer" class="photo-viewer" aria-label="Photo viewer" role="dialog">
     <div class="pv-inner" id="pvInner">
       <button id="pvPrev" class="pv-nav pv-prev" aria-label="Previous photo">‹</button>
@@ -350,7 +272,7 @@
     </div>
   </dialog>
 
-  <!-- Footer counters (moved to bottom of the page) -->
+  <!-- Footer -->
   <div id="countersFooter" style="max-width:1200px;margin:18px auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
     <div style="display:flex; align-items:center; gap:8px; justify-content:space-between;">
       <div style="display:flex; gap:8px; align-items:center">
@@ -372,28 +294,36 @@
     import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
     import { feature } from 'https://cdn.jsdelivr.net/npm/topojson-client@3/+esm';
 
-    // --- State & Storage ---
-    const LS_KEY = 'visitedTripsV1';
-    const MAX_PHOTOS = 3; // limit photos per country
-    // continent labels (ISO continent code -> readable)
+    // =========================================================
+    // Storage model (Option B)
+    // - localStorage: trips metadata only (no image data)
+    // - IndexedDB: photo blobs (JPEG)
+    // =========================================================
+
+    // ---------- LocalStorage ----------
+    const LS_KEY = 'visitedTripsV2';
+    const MAX_PHOTOS = 3;
     const CONTINENT_LABELS = { AF:'Africa', AN:'Antarctica', AS:'Asia', EU:'Europe', NA:'North America', OC:'Oceania', SA:'South America' };
-    let nameToContinent = new Map(); // normalized country name -> continent code
-    const continentById = new Map(); // topojson id -> continent code (computed from centroid)
-    let totalCountries = 0;
-    let continentTotals = {}; // { EU: 50, AS: ... }
-    /** trips shape: { [countryId]: { visits: Array<{date, rating, days, notes}>, photos: Array<dataUrl> } } */
+
+    /** trips shape:
+     * {
+     *   [countryId]: {
+     *     visits: Array<{ date:string, rating:number, days:number, notes:string, photoIds:number[] }>
+     *   }
+     * }
+     */
     let trips = loadTrips();
 
     function loadTrips(){
-      try {
+      try{
         const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-        // Normalize any simple-array legacy shape into the new {visits, photos} shape.
+        // Ensure correct shape (no backwards compatibility, just normalize)
         for(const [k, v] of Object.entries(raw)){
-          if(Array.isArray(v)){
-            raw[k] = { visits: v, photos: [] };
-          }else if(v && !v.visits){
-            // ensure object has visits/photos
-            raw[k] = { visits: [], photos: Array.isArray(v.photos) ? v.photos : [] };
+          if(!v || !Array.isArray(v.visits)) raw[k] = { visits: [] };
+          else {
+            v.visits.forEach(t => {
+              if(!Array.isArray(t.photoIds)) t.photoIds = [];
+            });
           }
         }
         return raw;
@@ -401,31 +331,196 @@
     }
     function saveTrips(){ localStorage.setItem(LS_KEY, JSON.stringify(trips)); }
 
-    // --- Elements ---
-    const svg = d3.select('#map');
-    const g = svg.append('g');
+    // ---------- IndexedDB helpers ----------
+    const DB_NAME = 'visitedCountriesPhotosDB';
+    const DB_VERSION = 1;
+    const STORE = 'photos'; // { id:auto, tripKey:string, createdAt:number, blob:Blob }
 
-    // --- Add zoom/pan behavior ---
-    // increase the maximum zoom so users can zoom in more (higher = more detail)
+    function openDB(){
+      return new Promise((resolve, reject)=>{
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = ()=> {
+          const db = req.result;
+          if(!db.objectStoreNames.contains(STORE)){
+            const os = db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+            os.createIndex('tripKey', 'tripKey', { unique: false });
+          }
+        };
+        req.onsuccess = ()=> resolve(req.result);
+        req.onerror = ()=> reject(req.error || new Error('IndexedDB open failed'));
+      });
+    }
+
+    async function idbAddPhoto(tripKey, blob){
+      const db = await openDB();
+      return new Promise((resolve, reject)=>{
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.onabort = ()=> reject(tx.error);
+        tx.onerror = ()=> reject(tx.error);
+        const store = tx.objectStore(STORE);
+        const req = store.add({ tripKey, createdAt: Date.now(), blob });
+        req.onsuccess = ()=> resolve(req.result); // id
+      });
+    }
+
+    async function idbGetPhotosByIds(ids = []){
+      const db = await openDB();
+      return new Promise((resolve, reject)=>{
+        const tx = db.transaction(STORE, 'readonly');
+        tx.onabort = ()=> reject(tx.error);
+        tx.onerror = ()=> reject(tx.error);
+        const store = tx.objectStore(STORE);
+        const results = [];
+        let remaining = ids.length;
+        if(!remaining) return resolve([]);
+        ids.forEach((id, i)=>{
+          const r = store.get(id);
+          r.onsuccess = ()=> {
+            results[i] = r.result || null;
+            remaining--;
+            if(remaining===0) resolve(results);
+          };
+          r.onerror = ()=> { remaining--; if(remaining===0) resolve(results); };
+        });
+      });
+    }
+
+    async function idbGetPhotosByTripKey(tripKey){
+      const db = await openDB();
+      return new Promise((resolve, reject)=>{
+        const tx = db.transaction(STORE, 'readonly');
+        tx.onabort = ()=> reject(tx.error);
+        tx.onerror = ()=> reject(tx.error);
+        const idx = tx.objectStore(STORE).index('tripKey');
+        const req = idx.getAll(IDBKeyRange.only(tripKey));
+        req.onsuccess = ()=> resolve(req.result || []);
+        req.onerror = ()=> resolve([]);
+      });
+    }
+
+    async function idbDeletePhoto(id){
+      const db = await openDB();
+      return new Promise((resolve, reject)=>{
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.onabort = ()=> reject(tx.error);
+        tx.onerror = ()=> reject(tx.error);
+        const store = tx.objectStore(STORE);
+        const r = store.delete(id);
+        r.onsuccess = ()=> resolve(true);
+        r.onerror = ()=> resolve(false);
+      });
+    }
+
+    async function idbClearAll(){
+      const db = await openDB();
+      return new Promise((resolve, reject)=>{
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.onabort = ()=> reject(tx.error);
+        tx.onerror = ()=> reject(tx.error);
+        const store = tx.objectStore(STORE);
+        const r = store.clear();
+        r.onsuccess = ()=> resolve(true);
+        r.onerror = ()=> resolve(false);
+      });
+    }
+
+    // ---------- Image utilities ----------
+    function canvasToBlob(canvas, type='image/jpeg', quality=0.72){
+      return new Promise((resolve, reject)=>{
+        canvas.toBlob(b=>{
+          if(!b) reject(new Error('Failed to encode image'));
+          else resolve(b);
+        }, type, quality);
+      });
+    }
+
+    function compressImageFile(file, maxDim = 1400, quality = 0.72){
+      return new Promise((resolve, reject)=>{
+        if(!(file instanceof Blob)) return reject(new Error('Not a file'));
+        const img = new Image();
+        img.onload = async ()=>{
+          try{
+            const iw = img.naturalWidth || img.width;
+            const ih = img.naturalHeight || img.height;
+            const max = Math.max(iw, ih);
+            const ratio = max > 0 ? Math.min(1, maxDim / max) : 1;
+            const cw = Math.max(1, Math.round(iw * ratio));
+            const ch = Math.max(1, Math.round(ih * ratio));
+            const canvas = document.createElement('canvas');
+            canvas.width = cw; canvas.height = ch;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, cw, ch);
+            const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+            URL.revokeObjectURL(img.src);
+            resolve(blob);
+          }catch(err){
+            URL.revokeObjectURL(img.src);
+            reject(err);
+          }
+        };
+        img.onerror = ()=> {
+          URL.revokeObjectURL(img.src);
+          reject(new Error('Failed to load image'));
+        };
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    function readFilesAsBlobs(files){
+      const arr = Array.from(files || []);
+      return Promise.all(arr.map(f=>{
+        if(!f || !f.type || !f.type.startsWith('image/')) return Promise.resolve(f);
+        return compressImageFile(f, 1400, 0.72);
+      }));
+    }
+
+    function blobToDataURL(blob){
+      return new Promise((resolve, reject)=>{
+        const r = new FileReader();
+        r.onerror = ()=> reject(new Error('Failed to read blob'));
+        r.onload = ()=> resolve(String(r.result));
+        r.readAsDataURL(blob);
+      });
+    }
+
+    function dataURLToBlob(dataURL){
+      const [meta, data] = dataURL.split(',');
+      const isBase64 = /;base64$/.test(meta) || /;base64;/.test(meta);
+      const mime = (meta.split(':')[1] || 'application/octet-stream').replace(/;base64/,'');
+      if(isBase64){
+        const bin = atob(data);
+        const len = bin.length;
+        const u8 = new Uint8Array(len);
+        for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+        return new Blob([u8], { type: mime || 'image/jpeg' });
+      }else{
+        return new Blob([decodeURIComponent(data)], { type: mime || 'image/jpeg' });
+      }
+    }
+
+    // =========================================================
+    // UI & App state
+    // =========================================================
+    const nameToContinent = new Map(); // (optional fallback)
+    const continentById = new Map();
+    let totalCountries = 0;
+    let continentTotals = {};
+
+    const svg = d3.select('#map'); const g = svg.append('g');
     const ZOOM_MAX = 32;
-    const zoom = d3.zoom()
-      .scaleExtent([1, ZOOM_MAX]) // min/max zoom (increased)
-      .on('zoom', (event) => g.attr('transform', event.transform));
-    svg.call(zoom); // enable mouse wheel / touch pinch / drag
-
-    // small cursor feedback while dragging
+    const zoom = d3.zoom().scaleExtent([1, ZOOM_MAX]).on('zoom', (event)=> g.attr('transform', event.transform));
+    svg.call(zoom);
     svg.on('mousedown touchstart', () => svg.style('cursor', 'grabbing'));
     svg.on('mouseup touchend touchcancel', () => svg.style('cursor', 'grab'));
-    // Help dialog wiring
+
     const helpBtn = document.getElementById('helpBtn');
     const helpDialog = document.getElementById('helpDialog');
     const closeHelp = document.getElementById('closeHelp');
     helpBtn?.addEventListener('click', ()=> helpDialog?.showModal());
     closeHelp?.addEventListener('click', ()=> helpDialog?.close());
-    helpDialog?.addEventListener('cancel', (e)=> e.preventDefault()); // prevent ESC from closing if you prefer keeping it open — remove if not desired
+    helpDialog?.addEventListener('cancel', (e)=> e.preventDefault());
 
     const tripListEl = document.getElementById('tripList');
-
     const modal = document.getElementById('tripModal');
     const form = document.getElementById('tripForm');
     const modalTitle = document.getElementById('modalTitle');
@@ -436,13 +531,16 @@
     const toggleSidebarBtn = document.getElementById('toggleSidebar');
     const sidebar = document.getElementById('sidebar');
 
-    // photo elements must be referenced before wiring their handlers
     const tripPhotoInput = document.getElementById('tripPhoto');
     const photoPreviewEl = document.getElementById('photoPreview');
-    // photos staged for the currently open modal (per-trip)
-    let currentModalPhotos = [];
 
-    // --- Photo viewer carousel state & helpers ---
+    // Modal photo staging (per-trip)
+    let stagedNewPhotos = [];           // Array<Blob> (newly added this edit)
+    let existingPhotoIds = [];          // Array<number> (for edit mode)
+    let removedExistingIds = new Set(); // Set<number>
+    let currentPreviewEntries = [];     // [{type:'existing'|'new', id?, blob?, url}]
+
+    // Viewer
     let viewerPhotos = [];
     let viewerIndex = 0;
     const viewerDialog = document.getElementById('photoViewer');
@@ -456,13 +554,10 @@
     function updateViewer(){
       if(!viewerDialog) return;
       if(!viewerPhotos || viewerPhotos.length===0){
-        viewerImg.src = '';
-        pvCounter.textContent = '';
-        pvPrev.style.display = 'none';
-        pvNext.style.display = 'none';
+        viewerImg.src = ''; pvCounter.textContent = '';
+        pvPrev.style.display = 'none'; pvNext.style.display = 'none';
         return;
       }
-      // clamp index
       if(viewerIndex < 0) viewerIndex = 0;
       if(viewerIndex >= viewerPhotos.length) viewerIndex = viewerPhotos.length - 1;
       viewerImg.src = viewerPhotos[viewerIndex] || '';
@@ -470,86 +565,245 @@
       pvPrev.style.display = (viewerPhotos.length > 1 && viewerIndex > 0) ? 'grid' : (viewerPhotos.length>1 ? 'grid' : 'none');
       pvNext.style.display = (viewerPhotos.length > 1 && viewerIndex < viewerPhotos.length - 1) ? 'grid' : (viewerPhotos.length>1 ? 'grid' : 'none');
     }
-
-    function showPhotoViewer(photosArray = [], startIndex = 0){
-      // accept single string too
-      if(!Array.isArray(photosArray)) photosArray = [String(photosArray || '')];
-      viewerPhotos = photosArray.slice();
-      viewerIndex = Math.max(0, Math.min(startIndex || 0, viewerPhotos.length - 1));
-      updateViewer();
-      viewerDialog.showModal();
-      // attach keyboard handler
-      window.addEventListener('keydown', viewerKeyHandler);
+    function showPhotoViewer(urls = [], startIndex = 0){
+      const arr = Array.isArray(urls) ? urls.slice() : [String(urls||'')];
+      viewerPhotos = arr; viewerIndex = Math.max(0, Math.min(startIndex||0, arr.length-1));
+      updateViewer(); viewerDialog.showModal(); window.addEventListener('keydown', viewerKeyHandler);
     }
-
-    function closePhotoViewer(){
-      if(!viewerDialog) return;
-      viewerDialog.close();
-      window.removeEventListener('keydown', viewerKeyHandler);
-      // clear image to free memory
-      viewerImg.src = '';
-      viewerPhotos = [];
-      viewerIndex = 0;
-    }
-
+    function closePhotoViewer(){ viewerDialog.close(); window.removeEventListener('keydown', viewerKeyHandler); viewerImg.src=''; viewerPhotos=[]; viewerIndex=0; }
     function viewerKeyHandler(e){
       if(!viewerDialog || !viewerDialog.open) return;
-      if(e.key === 'ArrowLeft') { e.preventDefault(); if(viewerIndex > 0){ viewerIndex -= 1; updateViewer(); } }
-      else if(e.key === 'ArrowRight') { e.preventDefault(); if(viewerIndex < viewerPhotos.length - 1){ viewerIndex += 1; updateViewer(); } }
-      else if(e.key === 'Escape'){ e.preventDefault(); closePhotoViewer(); }
+      if(e.key==='ArrowLeft'){ e.preventDefault(); if(viewerIndex>0){ viewerIndex--; updateViewer(); } }
+      else if(e.key==='ArrowRight'){ e.preventDefault(); if(viewerIndex<viewerPhotos.length-1){ viewerIndex++; updateViewer(); } }
+      else if(e.key==='Escape'){ e.preventDefault(); closePhotoViewer(); }
     }
-
-    // prev/next click
-    pvPrev.addEventListener('click', ()=> { if(viewerIndex > 0){ viewerIndex -= 1; updateViewer(); } });
-    pvNext.addEventListener('click', ()=> { if(viewerIndex < viewerPhotos.length - 1){ viewerIndex += 1; updateViewer(); } });
+    pvPrev.addEventListener('click', ()=> { if(viewerIndex>0){ viewerIndex--; updateViewer(); } });
+    pvNext.addEventListener('click', ()=> { if(viewerIndex<viewerPhotos.length-1){ viewerIndex++; updateViewer(); } });
     pvClose.addEventListener('click', closePhotoViewer);
-    // clicking backdrop closes viewer
     viewerDialog.addEventListener('click', (ev)=> { if(ev.target === viewerDialog) closePhotoViewer(); });
 
-    // touch swipe support (simple)
     (function wireSwipe(){
       let startX = null, deltaX = 0;
-      pvInner.addEventListener('touchstart', (ev)=> { startX = ev.touches && ev.touches[0] ? ev.touches[0].clientX : null; deltaX = 0; });
+      pvInner.addEventListener('touchstart', (ev)=> { startX = ev.touches?.[0]?.clientX ?? null; deltaX = 0; });
       pvInner.addEventListener('touchmove', (ev)=> {
         if(startX === null) return;
-        const x = ev.touches && ev.touches[0] ? ev.touches[0].clientX : null;
-        if(x === null) return;
-        deltaX = x - startX;
+        const x = ev.touches?.[0]?.clientX ?? null; if(x === null) return; deltaX = x - startX;
       });
       pvInner.addEventListener('touchend', ()=> {
         if(startX === null) return;
-        const threshold = 40; // px
+        const threshold = 40;
         if(deltaX > threshold){ if(viewerIndex > 0) { viewerIndex -= 1; updateViewer(); } }
         else if(deltaX < -threshold){ if(viewerIndex < viewerPhotos.length - 1){ viewerIndex += 1; updateViewer(); } }
         startX = null; deltaX = 0;
       });
     })();
 
-    // --- renderPhotoPreview: use the carousel viewer for clicks (and preserve remove behavior) ---
-    function renderPhotoPreview(countryId){
+    // Toolbar
+    document.getElementById('exportBtn').addEventListener('click', exportAll);
+    document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importInput').click());
+    document.getElementById('importInput').addEventListener('change', importAll);
+    document.getElementById('clearBtn').addEventListener('click', async ()=>{
+      if(confirm('Clear all saved trips and photos? This action cannot be undone.')){
+        trips = {}; saveTrips(); await idbClearAll(); renderAll();
+      }
+    });
+
+    toggleSidebarBtn?.addEventListener('click', ()=>{
+      sidebar.classList.toggle('open');
+      toggleSidebarBtn.textContent = sidebar.classList.contains('open') ? 'Hide Trips' : 'Show Trips';
+    });
+
+    // Map rendering
+    const projection = d3.geoMercator();
+    const path = d3.geoPath(projection);
+    let countryNameById = new Map();
+    let countriesFeat = null;
+
+    function getCountryName(id){
+      const s = String(id);
+      if(countryNameById.has(s)) return countryNameById.get(s);
+      const n = Number(id);
+      if(!Number.isNaN(n) && countryNameById.has(n)) return countryNameById.get(n);
+      if(countriesFeat){
+        const f = countriesFeat.features.find(ff => String(ff.id) === s || Number(ff.id) === n);
+        if(f?.properties?.name) return f.properties.name;
+      }
+      return `Country ${s}`;
+    }
+
+    async function loadMap(){
+      const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json());
+      const names = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/country-names.csv').then(r=>r.text());
+      d3.csvParse(names).forEach(row=>{
+        countryNameById.set(String(row.id), row.name);
+        const num = Number(row.id);
+        if(!Number.isNaN(num)) countryNameById.set(num, row.name);
+      });
+      countriesFeat = feature(world, world.objects.countries);
+      countriesFeat.features.forEach(f=>{
+        f.properties = f.properties || {};
+        f.properties.name = countryNameById.get(String(f.id)) || countryNameById.get(Number(f.id)) || f.properties.name || `Country ${f.id}`;
+      });
+      countriesFeat.features.forEach(f=>{
+        try{
+          const c = d3.geoCentroid(f);
+          const code = getContinentFromCoords(c[0], c[1]);
+          continentById.set(String(f.id), code);
+        }catch{}
+      });
+      totalCountries = countriesFeat.features.length;
+      continentTotals = {};
+      countriesFeat.features.forEach(f=>{
+        const id = String(f.id);
+        const code = continentById.get(id) || (nameToContinent.get(normalizeName(f.properties?.name || '')) || 'Unknown');
+        continentTotals[code] = (continentTotals[code] || 0) + 1;
+      });
+      draw();
+      window.addEventListener('resize', draw);
+      renderAll();
+    }
+
+    function getContinentFromCoords(lon, lat){
+      if(lat <= -60) return 'AN';
+      if(lon >= 110 && lon <= 180 && lat <= 10 && lat >= -50) return 'OC';
+      if(lon > 40 && lon <= 180 && lat >= -11 && lat <= 81) return 'AS';
+      if(lon >= -31 && lon <= 40 && lat >= 34 && lat <= 72) return 'EU';
+      if(lon >= -20 && lon <= 55 && lat >= -35 && lat <= 38) return 'AF';
+      if(lon >= -170 && lon <= -30 && lat >= 5 && lat <= 83) return 'NA';
+      if(lon >= -82 && lon <= -34 && lat >= -56 && lat <= 13) return 'SA';
+      return 'Unknown';
+    }
+
+    function draw(){
+      if(!countriesFeat) return;
+      const wrap = document.querySelector('#mapPanel .content');
+      const w = wrap.clientWidth - 4;
+      const h = Math.min(680, Math.max(360, Math.round(w * 0.52)));
+      svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
+      projection.fitExtent([[10,10],[w-10, h-10]], countriesFeat);
+      try {
+        const [[minX, minY], [maxX, maxY]] = path.bounds(countriesFeat);
+        const pad = Math.max(40, Math.round(Math.min(w,h) * 0.06));
+        zoom.translateExtent([[minX - pad, minY - pad], [maxX + pad, maxY + pad]]);
+      } catch {
+        zoom.translateExtent([[ -w * 0.25, -h * 0.25 ], [ w * 1.25, h * 1.25 ]]);
+      }
+
+      const paths = g.selectAll('path.country').data(countriesFeat.features, d=>d.id);
+      const entered = paths.enter().append('path')
+        .attr('class', d=> 'country'+(hasTrips(d.id)?' visited':'')) .attr('d', path)
+        .on('click', (_, d)=> openModalForCountry(d.id));
+      entered.append('title').text(d => getCountryName(d.id));
+      paths.attr('class', d=> 'country'+(hasTrips(d.id)?' visited':'')) .attr('d', path)
+        .select('title').text(d => getCountryName(d.id));
+      paths.exit().remove();
+    }
+
+    function hasTrips(countryId){
+      const entry = trips[String(countryId)];
+      return !!(entry && Array.isArray(entry.visits) && entry.visits.length > 0);
+    }
+
+    // ---------- Modal open / edit ----------
+    async function openModalForCountry(id, editIndex = null){
+      const name = getCountryName(id);
+      const entry = trips[String(id)] || { visits: [] };
+      const count = (entry.visits || []).length;
+      countryIdInput.value = String(id);
+
+      stagedNewPhotos = [];
+      removedExistingIds = new Set();
+
+      if(editIndex !== null){
+        editKeyInput.value = `${id}:${editIndex}`;
+        const t = (entry.visits || [])[editIndex] || {};
+        document.getElementById('tripDate').value = t.date || '';
+        document.getElementById('tripRating').value = t.rating ?? 7;
+        document.getElementById('tripDays').value = t.days ?? 1;
+        document.getElementById('tripNotes').value = t.notes || '';
+        existingPhotoIds = Array.isArray(t.photoIds) ? t.photoIds.slice() : [];
+        modalTitle.textContent = `Edit trip — ${name}`;
+        countryLabel.textContent = `Country: ${name} — Editing trip ${Number(editIndex)+1} of ${count}`;
+        saveBtn.textContent = 'Save changes';
+      } else {
+        editKeyInput.value = '';
+        document.getElementById('tripDate').value = '';
+        document.getElementById('tripRating').value = 7;
+        document.getElementById('tripDays').value = 1;
+        document.getElementById('tripNotes').value = '';
+        existingPhotoIds = [];
+        modalTitle.textContent = `Add trip — ${name}`;
+        countryLabel.textContent = `Country: ${name} — Adding new trip (${count} existing)`;
+        saveBtn.textContent = 'Add trip';
+      }
+
+      await renderPhotoPreview(String(id), editIndex);
+      modal.showModal();
+    }
+
+    document.getElementById('cancelModal').addEventListener('click', ()=>{
+      resetModalFields();
+      modal.close();
+    });
+
+    function resetModalFields(){
+      editKeyInput.value = '';
+      document.getElementById('tripDate').value = '';
+      document.getElementById('tripRating').value = 7;
+      document.getElementById('tripDays').value = 1;
+      document.getElementById('tripNotes').value = '';
+      stagedNewPhotos = [];
+      existingPhotoIds = [];
+      removedExistingIds = new Set();
+      currentPreviewEntries = [];
       photoPreviewEl.innerHTML = '';
-      // prefer current modal (per-trip) photos; fallback to legacy country photos if no staged photos
-      const photos = (Array.isArray(currentModalPhotos) && currentModalPhotos.length>0)
-        ? currentModalPhotos
-        : ((trips[countryId] && Array.isArray(trips[countryId].photos) && trips[countryId].photos.length>0) ? trips[countryId].photos : []);
-      photos.forEach((dataUrl, idx)=>{
+    }
+
+    // ---------- Photo preview in modal ----------
+    async function renderPhotoPreview(countryId, editIndex){
+      photoPreviewEl.innerHTML = '';
+      currentPreviewEntries = [];
+
+      // Load existing photos (for edit mode) except those marked removed
+      const existingIdsEffective = existingPhotoIds.filter(id => !removedExistingIds.has(id));
+      const existingRecords = await idbGetPhotosByIds(existingIdsEffective);
+      const existingUrls = existingRecords.map(rec => rec?.blob ? URL.createObjectURL(rec.blob) : null);
+
+      existingIdsEffective.forEach((id, idx)=>{
+        const url = existingUrls[idx];
+        if(!url) return;
+        currentPreviewEntries.push({ type:'existing', id, url });
+      });
+
+      // Add staged new photos
+      for(const blob of stagedNewPhotos){
+        const url = URL.createObjectURL(blob);
+        currentPreviewEntries.push({ type:'new', blob, url });
+      }
+
+      if(currentPreviewEntries.length===0){
+        photoPreviewEl.innerHTML = `<div style="color:var(--muted); font-size:12px">No photos for this trip yet.</div>`;
+        return;
+      }
+
+      currentPreviewEntries.forEach((entry, i)=>{
         const wrap = document.createElement('div');
         wrap.style.position = 'relative';
-        wrap.style.width = '120px';  // wider thumbnails for easier tapping
+        wrap.style.width = '120px';
         wrap.style.height = '80px';
         wrap.style.borderRadius = '8px';
         wrap.style.overflow = 'hidden';
         wrap.style.background = '#0b0720';
         wrap.style.display = 'inline-block';
         const img = document.createElement('img');
-        img.src = dataUrl;
+        img.src = entry.url;
         img.style.width = '100%';
         img.style.height = '100%';
         img.style.objectFit = 'cover';
         img.style.display = 'block';
         img.title = 'Tap to open full image';
-        // open the carousel at this photo
-        img.addEventListener('click', ()=> showPhotoViewer(photos, idx));
+        img.addEventListener('click', ()=> showPhotoViewer(currentPreviewEntries.map(e=>e.url), i));
+
         const rem = document.createElement('button');
         rem.type = 'button';
         rem.textContent = '✕';
@@ -564,315 +818,51 @@
         rem.style.width = '22px';
         rem.style.height = '22px';
         rem.style.cursor = 'pointer';
-        rem.addEventListener('click', ()=> {
+        rem.addEventListener('click', ()=>{
           if(!confirm('Remove this photo from the trip?')) return;
-          // remove from staged modal photos if present, otherwise remove from legacy country photos
-          if(Array.isArray(currentModalPhotos) && currentModalPhotos.length > 0){
-            currentModalPhotos.splice(idx, 1);
-          }else if(trips[countryId] && Array.isArray(trips[countryId].photos)){
-            trips[countryId].photos.splice(idx, 1);
-            saveTrips();
+          const e = currentPreviewEntries[i];
+          if(e.type === 'existing'){
+            removedExistingIds.add(e.id);
+            existingPhotoIds = existingPhotoIds.filter(pid => pid !== e.id);
+          }else{
+            const idx = stagedNewPhotos.indexOf(e.blob);
+            if(idx>=0) stagedNewPhotos.splice(idx,1);
           }
-          renderPhotoPreview(countryId);
+          renderPhotoPreview(countryId, editIndex);
         });
+
         wrap.appendChild(img);
         wrap.appendChild(rem);
         photoPreviewEl.appendChild(wrap);
       });
-      if(photos.length===0){
-        photoPreviewEl.innerHTML = `<div style="color:var(--muted); font-size:12px">No photos for this trip yet.</div>`;
-      }
     }
 
-    // Toolbar actions
-    document.getElementById('exportBtn').addEventListener('click', ()=>{
-      const blob = new Blob([JSON.stringify(trips, null, 2)], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'visited-countries-trips.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
-    document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importInput').click());
-    document.getElementById('importInput').addEventListener('change', async (e)=>{
-      const file = e.target.files[0]; if(!file) return;
-      try{
-        const text = await file.text();
-        const data = JSON.parse(text);
-        if(typeof data !== 'object') throw new Error('Invalid file');
-        trips = data; saveTrips();
-        renderAll();
-      }catch(err){ alert('Import failed: ' + err.message) }
-      e.target.value = '';
-    });
-    document.getElementById('clearBtn').addEventListener('click', ()=>{
-      if(confirm('Clear all saved trips and photos? This action cannot be undone.')) {
-        trips = {}; saveTrips(); renderAll();
-      }
-    });
-
-    toggleSidebarBtn?.addEventListener('click', ()=>{
-      sidebar.classList.toggle('open');
-      toggleSidebarBtn.textContent = sidebar.classList.contains('open') ? 'Hide Trips' : 'Show Trips';
-    });
-
-    // --- Map rendering ---
-    const projection = d3.geoMercator();
-    const path = d3.geoPath(projection);
-
-    let countryNameById = new Map();
-    let countriesFeat = null;
-
-    // helper to get a readable country name from various sources
-    function getCountryName(id){
-      // Try CSV map (string and numeric), then feature properties if available
-      const s = String(id);
-      if(countryNameById.has(s)) return countryNameById.get(s);
-      const n = Number(id);
-      if(!Number.isNaN(n) && countryNameById.has(n)) return countryNameById.get(n);
-      if(countriesFeat){
-        const f = countriesFeat.features.find(ff => String(ff.id) === s || Number(ff.id) === n);
-        if(f && f.properties && f.properties.name) return f.properties.name;
-      }
-      return `Country ${s}`;
-    }
-
-    async function loadMap(){
-      // world-atlas provides TopoJSON with numeric country ids. We'll also fetch a CSV mapping to names.
-      const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json());
-      const names = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/country-names.csv').then(r=>r.text());
-      // build map (store both string and numeric keys as a convenience)
-      d3.csvParse(names).forEach(row=>{
-        countryNameById.set(String(row.id), row.name);
-        const num = Number(row.id);
-        if(!Number.isNaN(num)) countryNameById.set(num, row.name);
-      });
-      countriesFeat = feature(world, world.objects.countries);
-      // populate feature.properties.name so we can always read it
-      countriesFeat.features.forEach(f=>{
-        f.properties = f.properties || {};
-        f.properties.name = countryNameById.get(String(f.id)) || countryNameById.get(Number(f.id)) || f.properties.name || `Country ${f.id}`;
-      });
-      // compute centroid-based continent for each country feature (best-effort)
-      countriesFeat.features.forEach(f=>{
-        try{
-          const c = d3.geoCentroid(f); // [lon, lat]
-          const code = getContinentFromCoords(c[0], c[1]);
-          continentById.set(String(f.id), code);
-        }catch(e){
-          // ignore; continentById will remain empty for this id and fallback will be used
-        }
-      });
-      // build totals per-continent and total countries
-      totalCountries = countriesFeat.features.length;
-      continentTotals = {};
-      countriesFeat.features.forEach(f=>{
-        const id = String(f.id);
-        const code = continentById.get(id) || (nameToContinent.get(normalizeName(f.properties?.name || '')) || 'Unknown');
-        continentTotals[code] = (continentTotals[code] || 0) + 1;
-      });
-      draw();
-      window.addEventListener('resize', draw);
-
-      // render after map+centroid processing — updateCounters will use continentById first
-      renderAll();
-    }
-
-    // Heuristic continent detection from lon/lat (best-effort bounding boxes)
-    function getContinentFromCoords(lon, lat){
-      if(lat <= -60) return 'AN';
-      // Oceania (Australia + Pacific)
-      if(lon >= 110 && lon <= 180 && lat <= 10 && lat >= -50) return 'OC';
-      // Asia (broad)
-      if(lon > 40 && lon <= 180 && lat >= -11 && lat <= 81) return 'AS';
-      // Europe
-      if(lon >= -31 && lon <= 40 && lat >= 34 && lat <= 72) return 'EU';
-      // Africa
-      if(lon >= -20 && lon <= 55 && lat >= -35 && lat <= 38) return 'AF';
-      // North America (including Greenland)
-      if(lon >= -170 && lon <= -30 && lat >= 5 && lat <= 83) return 'NA';
-      // South America
-      if(lon >= -82 && lon <= -34 && lat >= -56 && lat <= 13) return 'SA';
-      // fallback unknown
-      return 'Unknown';
-    }
-
-    function draw(){
-      if(!countriesFeat) return;
-      const wrap = document.querySelector('#mapPanel .content');
-      const w = wrap.clientWidth - 4; // padding
-      const h = Math.min(680, Math.max(360, Math.round(w * 0.52)));
-      svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
-
-      projection.fitExtent([[10,10],[w-10, h-10]], countriesFeat);
-
-      // Tighten pan bounds: compute screen-space bounds of the world feature and use it (adds small padding).
-      try {
-        const [[minX, minY], [maxX, maxY]] = path.bounds(countriesFeat);
-        const pad = Math.max(40, Math.round(Math.min(w,h) * 0.06)); // small padding relative to viewport
-        zoom.translateExtent([[minX - pad, minY - pad], [maxX + pad, maxY + pad]]);
-      } catch (err) {
-        // fallback to a reasonable default if bounds computation fails
-        zoom.translateExtent([[ -w * 0.25, -h * 0.25 ], [ w * 1.25, h * 1.25 ]]);
-      }
-
-      const paths = g.selectAll('path.country').data(countriesFeat.features, d=>d.id);
-      const entered = paths.enter().append('path')
-        .attr('class', d=> 'country'+(hasTrips(d.id)?' visited':''))
-        .attr('d', path)
-        .on('click', (_, d)=> openModalForCountry(d.id));
-
-      // add accessible hover title on enter
-      entered.append('title').text(d => getCountryName(d.id));
-
-      // update selection: path shape, classes and title
-      paths
-        .attr('class', d=> 'country'+(hasTrips(d.id)?' visited':''))
-        .attr('d', path)
-        .select('title').text(d => getCountryName(d.id));
-
-      paths.exit().remove();
-    }
-
-    function hasTrips(countryId){
-      const entry = trips[String(countryId)];
-      return !!(entry && Array.isArray(entry.visits) && entry.visits.length > 0);
-    }
-
-    function openModalForCountry(id, editIndex = null){
-      const name = getCountryName(id);
-      const entry = trips[String(id)] || { visits: [], photos: [] };
-      const count = (entry.visits || []).length;
-      countryIdInput.value = String(id);
-
-      // If editing a specific visit, show edit mode; otherwise add mode.
-      if(editIndex !== null){
-        editKeyInput.value = `${id}:${editIndex}`;
-        const t = (entry.visits || [])[editIndex] || {};
-        document.getElementById('tripDate').value = t.date || '';
-        document.getElementById('tripRating').value = t.rating ?? 7;
-        document.getElementById('tripDays').value = t.days ?? 1;
-        document.getElementById('tripNotes').value = t.notes || '';
-        // preload photos for this trip (if any)
-        currentModalPhotos = Array.isArray(t.photos) ? t.photos.slice() : [];
-        // Clear confusion: explicit edit title and button text
-        modalTitle.textContent = `Edit trip — ${name}`;
-        countryLabel.textContent = `Country: ${name} — Editing trip ${Number(editIndex)+1} of ${count}`;
-        saveBtn.textContent = 'Save changes';
-      } else {
-        editKeyInput.value = '';
-        document.getElementById('tripDate').value = '';
-        document.getElementById('tripRating').value = 7;
-        document.getElementById('tripDays').value = 1;
-        document.getElementById('tripNotes').value = '';
-        // clear staged photos for a new trip
-        currentModalPhotos = [];
-        modalTitle.textContent = `Add trip — ${name}`;
-        countryLabel.textContent = `Country: ${name} — Adding new trip (${count} existing)`;
-        saveBtn.textContent = 'Add trip';
-      }
-
-      // render modal preview
-      renderPhotoPreview(String(id));
-      modal.showModal();
-    }
-
-    // When photo input changes, read files into the modal's staged photos (per-trip), enforce MAX_PHOTOS
+    // Add photos input
     tripPhotoInput?.addEventListener('change', async (e)=>{
       const files = Array.from(e.target.files || []);
       if(!files.length) return;
       try{
-        const remaining = Math.max(0, MAX_PHOTOS - currentModalPhotos.length);
+        const currentCount = existingPhotoIds.filter(id=>!removedExistingIds.has(id)).length + stagedNewPhotos.length;
+        const remaining = Math.max(0, MAX_PHOTOS - currentCount);
         if(remaining <= 0){
           alert(`Maximum ${MAX_PHOTOS} photos allowed per trip.`);
         }else{
           const filesToRead = files.slice(0, remaining);
-          const dataUrls = await readFilesAsDataURLs(filesToRead);
-          currentModalPhotos.push(...dataUrls);
+          const blobs = await readFilesAsBlobs(filesToRead);
+          stagedNewPhotos.push(...blobs);
           if(files.length > remaining){
             alert(`Added ${remaining} photo(s). Maximum ${MAX_PHOTOS} photos allowed per trip.`);
           }
-          // update preview after adding staged photos
-          renderPhotoPreview(countryIdInput.value);
+          await renderPhotoPreview(countryIdInput.value, editKeyInput.value ? Number(editKeyInput.value.split(':')[1]) : null);
         }
       }catch(err){
         alert('Failed to add photos: ' + err.message);
       }
-      e.target.value = ''; // clear selection
+      e.target.value = '';
     });
 
-    // Reset modal fields (used for Cancel)
-    function resetModalFields(){
-      editKeyInput.value = '';
-      document.getElementById('tripDate').value = '';
-      document.getElementById('tripRating').value = 7;
-      document.getElementById('tripDays').value = 1;
-      document.getElementById('tripNotes').value = '';
-      // clear staged modal photos
-      currentModalPhotos = [];
-      // refresh photo preview (will show "No photos" for modal)
-      renderPhotoPreview(countryIdInput.value);
-    }
-    // Cancel button: close modal and discard in-modal edits
-    document.getElementById('cancelModal').addEventListener('click', ()=>{
-      resetModalFields();
-      modal.close();
-    });
-
-    // helper to read files as data URLs and attach to country photos
-    // Compress image file via canvas and return a JPEG data URL.
-    // maxDim: maximum width/height in pixels; quality: 0..1 JPEG quality.
-    function compressImageFile(file, maxDim = 1600, quality = 0.75){
-      return new Promise((resolve, reject)=>{
-        if(!(file instanceof Blob)) return reject(new Error('Not a file'));
-        const img = new Image();
-        img.onload = ()=>{
-          try{
-            const iw = img.naturalWidth || img.width;
-            const ih = img.naturalHeight || img.height;
-            const max = Math.max(iw, ih);
-            const ratio = max > 0 ? Math.min(1, maxDim / max) : 1;
-            const cw = Math.max(1, Math.round(iw * ratio));
-            const ch = Math.max(1, Math.round(ih * ratio));
-            const canvas = document.createElement('canvas');
-            canvas.width = cw; canvas.height = ch;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, cw, ch);
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            URL.revokeObjectURL(img.src);
-            resolve(dataUrl);
-          }catch(err){
-            URL.revokeObjectURL(img.src);
-            reject(err);
-          }
-        };
-        img.onerror = ()=> {
-          URL.revokeObjectURL(img.src);
-          reject(new Error('Failed to load image'));
-        };
-        img.src = URL.createObjectURL(file);
-      });
-    }
-
-    // Read files as (optionally compressed) data URLs. Images are compressed to reduce size.
-    function readFilesAsDataURLs(files){
-      const arr = Array.from(files || []);
-      return Promise.all(arr.map(f=>{
-        if(!f || !f.type || !f.type.startsWith('image/')){
-          // fallback: read as original data URL
-          return new Promise((resolve, reject)=>{
-            const r = new FileReader();
-            r.onerror = ()=> reject(new Error('Failed to read file'));
-            r.onload = ()=> resolve(String(r.result));
-            r.readAsDataURL(f);
-          });
-        }
-        // compress images (max dimension 1600px, quality 0.75)
-        return compressImageFile(f, 1600, 0.75);
-      }));
-    }
-
-    form.addEventListener('submit', (e)=>{
+    // ---------- Save trip ----------
+    form.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const id = countryIdInput.value;
       const entry = {
@@ -880,32 +870,58 @@
         rating: Number(document.getElementById('tripRating').value||'0'),
         days: Math.max(1, Math.floor(Number(document.getElementById('tripDays').value||'1'))),
         notes: (document.getElementById('tripNotes').value||'').trim(),
-        photos: Array.isArray(currentModalPhotos) ? currentModalPhotos.slice() : []
       };
       if(!entry.date || !(entry.rating>=1 && entry.rating<=10) || !(entry.days>=1)){
         alert('Please provide a date, a rating between 1 and 10, and duration of at least 1 day.');
         return;
       }
-      // ensure new shape
-      trips[id] = trips[id] || { visits: [], photos: [] };
+
+      trips[id] = trips[id] || { visits: [] };
       const key = editKeyInput.value;
+
       if(key){
         const [, idxStr] = key.split(':');
-        trips[id].visits[Number(idxStr)] = entry;
-      }else{
-        // allow multiple visits: always push new entries
-        trips[id].visits.push(entry);
+        const idx = Number(idxStr);
+        const visit = trips[id].visits[idx] || { photoIds: [] };
+
+        // Delete removed existing photos
+        for(const pid of Array.from(removedExistingIds)) await idbDeletePhoto(pid);
+
+        // Add new photos to IDB
+        const tripKey = `${id}:${idx}`;
+        for(const blob of stagedNewPhotos){
+          const newId = await idbAddPhoto(tripKey, blob);
+          visit.photoIds.push(newId);
+        }
+
+        // Update metadata (keep only ids that still exist)
+        visit.photoIds = visit.photoIds.filter(pid => !removedExistingIds.has(pid));
+        visit.date = entry.date; visit.rating = entry.rating; visit.days = entry.days; visit.notes = entry.notes;
+        trips[id].visits[idx] = visit;
+      } else {
+        // Add mode: first push a visit with no photos to get index
+        const newVisit = { date: entry.date, rating: entry.rating, days: entry.days, notes: entry.notes, photoIds: [] };
+        trips[id].visits.push(newVisit);
+        const idx = trips[id].visits.length - 1;
+        const tripKey = `${id}:${idx}`;
+        for(const blob of stagedNewPhotos){
+          const newId = await idbAddPhoto(tripKey, blob);
+          newVisit.photoIds.push(newId);
+        }
+        trips[id].visits[idx] = newVisit;
       }
+
       saveTrips();
-      // clear staged photos after save
-      currentModalPhotos = [];
+      stagedNewPhotos = []; removedExistingIds = new Set(); existingPhotoIds = [];
       modal.close();
       renderAll();
     });
 
-    // --- Sidebar rendering (iterate visits inside country objects) ---
+    // ---------- Sidebar list ----------
+    document.getElementById('search').addEventListener('input', (e)=> renderTripsList(e.target.value));
+
     function renderTripsList(filter=''){
-      const query = filter.trim().toLowerCase();
+      const query = (filter||'').trim().toLowerCase();
       const items = [];
       for(const [id, obj] of Object.entries(trips)){
         if(!obj) continue;
@@ -914,33 +930,24 @@
         const name = getCountryName(id);
         visits.forEach((t, idx)=> items.push({ id, idx, name, ...t }));
       }
-      // Sort by date desc, then name
       items.sort((a,b)=> (b.date||'').localeCompare(a.date||'') || a.name.localeCompare(b.name));
-
-      const filtered = query ? items.filter(it=>
-        it.name.toLowerCase().includes(query) || (it.notes||'').toLowerCase().includes(query)
-      ) : items;
+      const filtered = query ? items.filter(it=> it.name.toLowerCase().includes(query) || (it.notes||'').toLowerCase().includes(query) ) : items;
 
       if(filtered.length===0){
         tripListEl.innerHTML = `<div class="empty">No trips yet. Use the map to add your trips.</div>`;
         return;
       }
 
+      // Build cards (thumbnails filled asynchronously)
       tripListEl.innerHTML = filtered.map(it=>{
         const dateStr = it.date ? new Date(it.date).toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'}) : 'No date';
         const notes = it.notes ? it.notes.replace(/</g,'&lt;') : '';
         const daysLabel = it.days ? `${it.days} day${it.days===1?'':'s'}` : '—';
-        // thumbnails: prefer trip-specific photos (it.photos), otherwise fallback to legacy country photos
-        const photos = (it.photos && it.photos.length) ? it.photos.slice(0, MAX_PHOTOS)
-                      : ((trips[it.id] && trips[it.id].photos) ? trips[it.id].photos.slice(0, MAX_PHOTOS) : []);
-        const thumbHtml = photos.length
-          ? photos.map(p=> `<img src="${p}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;margin-right:6px" />`).join('')
-          : '';
         return `
           <div class="card" data-key="${it.id}:${it.idx}">
             <div class="row" style="justify-content:space-between">
-              <div style="font-weight:700; display:flex; align-items:center">
-                ${thumbHtml}
+              <div style="font-weight:700; display:flex; align-items:center; gap:8px">
+                <div class="thumbs" data-thumb="${it.id}:${it.idx}" style="display:flex;gap:6px"></div>
                 <div>${it.name}</div>
               </div>
               <div class="meta">${dateStr}</div>
@@ -959,49 +966,57 @@
           </div>`;
       }).join('');
 
-      // Bind buttons and thumbnail clicks
+      // Bind card actions
       tripListEl.querySelectorAll('.card').forEach(card=>{
         const [countryId, indexStr] = card.dataset.key.split(':');
         const idx = Number(indexStr);
         card.querySelector('[data-action="edit"]').addEventListener('click', ()=> openModalForCountry(countryId, idx));
         card.querySelector('[data-action="delete"]').addEventListener('click', ()=> deleteTrip(countryId, idx));
         card.querySelector('[data-action="focus"]').addEventListener('click', ()=> focusCountry(countryId));
-        // compute same photos array used for the card thumbnails:
-        const tripObj = trips[countryId];
-        let photos = [];
-        if(tripObj){
-          const visit = (Array.isArray(tripObj.visits) && tripObj.visits[idx]) ? tripObj.visits[idx] : null;
-          if(visit && Array.isArray(visit.photos) && visit.photos.length) photos = visit.photos.slice(0, MAX_PHOTOS);
-          else if(Array.isArray(tripObj.photos) && tripObj.photos.length) photos = tripObj.photos.slice(0, MAX_PHOTOS);
-        }
-        // bind any thumbnail images inside the card to open the in-page viewer
-        const imgs = Array.from(card.querySelectorAll('img'));
-        imgs.forEach((imgEl, i)=>{
-          imgEl.style.cursor = 'zoom-in';
-          imgEl.addEventListener('click', (ev)=> {
-            ev.stopPropagation();
-            // if photos is empty fallback to single image src
-            if(photos.length) showPhotoViewer(photos, i);
-            else showPhotoViewer([imgEl.src], 0);
-          });
-        });
       });
+
+      // Fill thumbnails asynchronously
+      (async ()=>{
+        const containers = Array.from(document.querySelectorAll('[data-thumb]'));
+        for(const cont of containers){
+          const [cid, idxStr] = cont.getAttribute('data-thumb').split(':');
+          const idx = Number(idxStr);
+          const visit = trips[cid]?.visits?.[idx];
+          if(!visit) continue;
+          const ids = (visit.photoIds || []).slice(0, MAX_PHOTOS);
+          if(!ids.length) continue;
+          const recs = await idbGetPhotosByIds(ids);
+          const urls = recs.map(r=> r?.blob ? URL.createObjectURL(r.blob) : null).filter(Boolean);
+          urls.forEach((u, i)=>{
+            const img = document.createElement('img');
+            img.src = u;
+            img.style.width = '48px'; img.style.height = '36px'; img.style.objectFit = 'cover'; img.style.borderRadius = '6px';
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', async (ev)=>{
+              ev.stopPropagation();
+              // Open viewer with full set for this visit
+              const allRecs = await idbGetPhotosByIds(visit.photoIds || []);
+              const allUrls = allRecs.map(r=> r?.blob ? URL.createObjectURL(r.blob) : null).filter(Boolean);
+              showPhotoViewer(allUrls, i);
+            });
+            cont.appendChild(img);
+          });
+        }
+      })();
     }
 
-    function deleteTrip(countryId, idx){
+    async function deleteTrip(countryId, idx){
       const name = getCountryName(String(countryId)) || 'this country';
       if(!confirm(`Delete this trip entry for ${name}?`)) return;
       if(!trips[countryId]) return;
       const visits = trips[countryId].visits || [];
-      visits.splice(idx,1);
-
-      // keep photos even if visits become zero; if no visits and no photos, remove key
-      const photos = trips[countryId].photos || [];
-      if(visits.length===0 && (!photos || photos.length===0)){
-        delete trips[countryId];
-      }else{
-        trips[countryId].visits = visits;
+      const visit = visits[idx];
+      // delete photos from IDB
+      if(visit && Array.isArray(visit.photoIds)) {
+        for(const pid of visit.photoIds) await idbDeletePhoto(pid);
       }
+      visits.splice(idx,1);
+      trips[countryId].visits = visits;
       saveTrips();
       renderAll();
     }
@@ -1017,18 +1032,12 @@
       const dx = x1 - x0, dy = y1 - y0;
       const cx = (x0 + x1)/2, cy = (y0 + y1)/2;
       const scale = Math.min(W/(dx + pad*2), H/(dy + pad*2));
-      // clamp programmatic focus zoom to the same max allowed by the behavior
       const clampedScale = Math.min(scale, ZOOM_MAX);
-      // Build d3 transform: translate to center, scale, translate to place country center at origin
       const t = d3.zoomIdentity.translate(W/2, H/2).scale(clampedScale).translate(-cx, -cy);
-      // apply focus and keep it until user interacts (no automatic reset)
       svg.transition().duration(600).call(zoom.transform, t);
     }
 
-    // Search
-    document.getElementById('search').addEventListener('input', (e)=> renderTripsList(e.target.value));
-
-    // update counters UI: show visited / total for overall and per-continent
+    // Counters
     function updateCounters(){
       const cntEl = document.getElementById('cntTotal');
       const byContEl = document.getElementById('cntByContinent');
@@ -1036,7 +1045,7 @@
       for(const [cid, obj] of Object.entries(trips)){
         const visits = (obj && Array.isArray(obj.visits)) ? obj.visits : [];
         if(!visits.length) continue;
-        counts.totalVisitedCountries += 1; // unique countries visited
+        counts.totalVisitedCountries += 1;
         const centroidCont = continentById.get(String(cid));
         let cont = centroidCont;
         if(!cont || cont === 'Unknown'){
@@ -1046,7 +1055,6 @@
         }
         counts.byContVisited[cont] = (counts.byContVisited[cont] || 0) + 1;
       }
-      // overall visited / total
       if(cntEl) cntEl.innerHTML = `${counts.totalVisitedCountries} / ${totalCountries || 0}`;
       if(byContEl){
         byContEl.innerHTML = '';
@@ -1064,7 +1072,6 @@
           el.innerHTML = `<strong style="color:var(--text);margin-right:6px">${visited}</strong>${label} ${visited}/${total}`;
           byContEl.appendChild(el);
         });
-        // unknown bucket
         const unknownVisited = counts.byContVisited['Unknown'] || 0;
         const unknownTotal = continentTotals['Unknown'] || 0;
         if(unknownVisited || unknownTotal){
@@ -1080,24 +1087,87 @@
       }
     }
 
-    // ensure counters update whenever the list or map is rendered
     function renderAll(){
-      // Update visited classes
-      g.selectAll('path.country').attr('class', d=> 'country'+(hasTrips(d.id)?' visited':''));
+      g.selectAll('path.country').attr('class', d=> 'country'+(hasTrips(d.id)?' visited':'')); // map fill
       renderTripsList(document.getElementById('search').value || '');
       updateCounters();
     }
 
-    // Boot: wait for map load then render trips immediately so sidebar shows everything by default
+    // Export (trips + photos as dataURLs)
+    async function exportAll(){
+      const out = { version: 2, trips: {} };
+      for(const [cid, obj] of Object.entries(trips)){
+        if(!obj || !Array.isArray(obj.visits)) continue;
+        const visitsOut = [];
+        for(const v of obj.visits){
+          const photos = [];
+          if(Array.isArray(v.photoIds) && v.photoIds.length){
+            const recs = await idbGetPhotosByIds(v.photoIds);
+            for(const rec of recs){
+              if(rec?.blob){
+                const dataUrl = await blobToDataURL(rec.blob);
+                photos.push(dataUrl);
+              }
+            }
+          }
+          visitsOut.push({ date: v.date, rating: v.rating, days: v.days, notes: v.notes, photos });
+        }
+        out.trips[cid] = { visits: visitsOut };
+      }
+      const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'visited-countries-trips.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Import (rebuild trips + write photos into IndexedDB)
+    async function importAll(e){
+      const file = e.target.files?.[0]; if(!file) return;
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if(!data || typeof data !== 'object' || !data.trips) throw new Error('Invalid file format');
+        // Clear current data
+        trips = {};
+        await idbClearAll();
+
+        // Rebuild
+        for(const [cid, obj] of Object.entries(data.trips)){
+          const visitsIn = Array.isArray(obj?.visits) ? obj.visits : [];
+          trips[cid] = { visits: [] };
+          for(const v of visitsIn){
+            const visit = { date: v.date, rating: v.rating, days: v.days, notes: v.notes, photoIds: [] };
+            trips[cid].visits.push(visit);
+            const idx = trips[cid].visits.length - 1;
+            const tripKey = `${cid}:${idx}`;
+            const photosArr = Array.isArray(v.photos) ? v.photos : [];
+            for(const p of photosArr){
+              const blob = dataURLToBlob(String(p));
+              const id = await idbAddPhoto(tripKey, blob);
+              visit.photoIds.push(id);
+            }
+          }
+        }
+        saveTrips();
+        renderAll();
+      }catch(err){
+        alert('Import failed: ' + err.message);
+      }
+      e.target.value = '';
+    }
+
+    // Utilities
+    function normalizeName(s){ return String(s||'').trim().toLowerCase(); }
+
+    // Boot
     loadMap();
 
-    // use the provided image.png as favicon
+    // Favicon
     (function setFavicon(){
       const link = document.getElementById('favicon');
-      if(link){
-        // image.png should be next to this HTML file (src/image.png)
-        link.href = 'image.png';
-      }
+      if(link){ link.href = 'image.png'; }
     })();
   </script>
 </body>
