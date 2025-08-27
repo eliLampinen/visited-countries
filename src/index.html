@@ -406,8 +406,10 @@
     const g = svg.append('g');
 
     // --- Add zoom/pan behavior ---
+    // increase the maximum zoom so users can zoom in more (higher = more detail)
+    const ZOOM_MAX = 32;
     const zoom = d3.zoom()
-      .scaleExtent([1, 8]) // min/max zoom
+      .scaleExtent([1, ZOOM_MAX]) // min/max zoom (increased)
       .on('zoom', (event) => g.attr('transform', event.transform));
     svg.call(zoom); // enable mouse wheel / touch pinch / drag
 
@@ -1015,8 +1017,10 @@
       const dx = x1 - x0, dy = y1 - y0;
       const cx = (x0 + x1)/2, cy = (y0 + y1)/2;
       const scale = Math.min(W/(dx + pad*2), H/(dy + pad*2));
+      // clamp programmatic focus zoom to the same max allowed by the behavior
+      const clampedScale = Math.min(scale, ZOOM_MAX);
       // Build d3 transform: translate to center, scale, translate to place country center at origin
-      const t = d3.zoomIdentity.translate(W/2, H/2).scale(scale).translate(-cx, -cy);
+      const t = d3.zoomIdentity.translate(W/2, H/2).scale(clampedScale).translate(-cx, -cy);
       // apply focus and keep it until user interacts (no automatic reset)
       svg.transition().duration(600).call(zoom.transform, t);
     }
