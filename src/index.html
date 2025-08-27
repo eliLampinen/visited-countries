@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visited Countries</title>
+  <link id="favicon" rel="icon" href="">
+  <style>
+    :root{
+      /* lightened palette (subtle shift towards brighter tones) */
+      --bg: #161129;        /* slightly lighter page background */
+      --bg-2: #1b1632;
+      --card: #2f275f;      /* lighter card base */
+      --card-2:#332e6d;     /* lighter card gradient */
+      --text:#f7f7fb;       /* slightly brighter text */
+      --muted:#d6d0f5;      /* softer muted text */
+      --purple:#8b5cf6;     /* lighter primary */
+      --purple-700:#7c3aed;
+      --accent:#c4b5fd;
+      --green:#9ef0c5;      /* softer visited green */
+      --danger:#ef6666;     /* slightly brighter danger */
+      --warning:#f6a94a;
+      --shadow: 0 8px 20px rgba(0,0,0,.18); /* lighter shadow */
+      --not-visited: #42507a; /* clearer, distinct not-visited color */
+    }
+    html,body{height:100%}
+    body{
+      margin:0;
+      /* increased lightness in the background gradients */
+      background:
+        radial-gradient(1200px 800px at 18% -18%, rgba(139,92,246,.22), transparent 60%),
+        radial-gradient(1000px 600px at 110% 18%, rgba(196,181,253,.16), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+    }
+    header{
+      position:sticky; top:0; z-index:10; backdrop-filter: saturate(120%) blur(6px);
+      background: linear-gradient(180deg, rgba(22,16,41,.88), rgba(22,16,41,.72));
+      border-bottom: 1px solid rgba(167,139,250,.12);
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:12px 16px}
+    .title{display:flex; align-items:center; gap:12px}
+    .logo{
+      width:38px; height:38px; border-radius:12px; background: transparent;
+      display:grid; place-items:center; box-shadow: var(--shadow);
+    }
+    .logo span{font-weight:800; font-size:18px}
+    .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+    .toolbar .spacer{flex:1}
+    button, .btn{
+      appearance:none; border:0; color:white; background:var(--purple);
+      padding:10px 12px; border-radius:12px; font-weight:600; cursor:pointer; box-shadow: var(--shadow);
+      transition: transform .05s ease, background .2s ease, opacity .2s ease;
+    }
+    button.ghost{background:transparent; border:1px solid rgba(167,139,250,.28); color:var(--muted)}
+    button.flat{background:var(--card-2)}
+    button:hover{background:var(--purple-700)}
+    button:active{transform: translateY(1px)}
+    .danger{background: var(--danger)}
+
+    /* Layout */
+    .app{max-width:1200px; margin:18px auto; padding:0 16px; display:grid; grid-template-columns: 1.6fr .9fr; gap:18px}
+    .panel{background: linear-gradient(180deg, var(--card), var(--card-2)); border:1px solid rgba(167,139,250,.12); border-radius:16px; box-shadow: var(--shadow)}
+    .panel h2{margin:0; padding:14px 16px; border-bottom:1px solid rgba(167,139,250,.09); font-size:16px; letter-spacing:.3px}
+    .panel .content{padding:12px}
+
+    /* Map */
+    #map{ width:100%; height:min(70vh, 680px); touch-action: none; cursor: grab; } /* enable touch gestures and show grab cursor */
+    .map-wrap{ position:relative; }
+    .map-legend{ position:absolute; right:10px; bottom:10px; background: rgba(21,16,42,.78); border:1px solid rgba(167,139,250,.14); border-radius:12px; padding:10px 12px; font-size:12px}
+    .map-legend .swatch{ display:inline-block; width:14px; height:10px; border-radius:3px; margin-right:6px; vertical-align:middle }
+
+    .country{ fill:var(--not-visited); stroke:#8b5cf644; stroke-width:.6; cursor:pointer; transition: fill .15s ease, stroke .2s ease }
+    .country:hover{ fill:#4a3a9a }
+    .country.visited{ fill:var(--green); stroke:#43b686 }
+
+    /* Sidebar cards */
+    .card{ background: linear-gradient(180deg, #352b6f, #2b2459); border:1px solid rgba(167,139,250,.12); border-radius:16px; padding:12px; margin:10px 0; box-shadow: var(--shadow)}
+    .card .meta{ font-size:12px; color: var(--muted) }
+    .card .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    .badge{ background: rgba(139,92,246,.16); color:#f3edff; border:1px solid rgba(139,92,246,.22); padding:4px 8px; border-radius:999px; font-size:12px }
+    .rating{ background: rgba(158,240,197,.12); color:#e9fff0; border:1px solid rgba(158,240,197,.18) }
+
+    /* Trip Editor (modal) */
+    dialog{ background: linear-gradient(180deg, #332861, #2d2552); color:var(--text); border:1px solid rgba(167,139,250,.18); border-radius:16px; box-shadow: var(--shadow); width:min(520px, 92vw) }
+    dialog::backdrop{ background: rgba(12,9,26,.54); backdrop-filter: blur(3px) }
+    /* Grid: three columns on wide screens, two on medium, one on small */
+    form .grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:10px;
+      align-items:start;
+    }
+    /* medium screens: two columns to avoid cramped inputs */
+    @media (max-width: 760px){
+      form .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    /* small screens: stack */
+    @media (max-width: 560px){
+      form .grid{ grid-template-columns: 1fr }
+    }
+    /* ensure each grid cell can shrink and inputs don't overflow */
+    form .grid > div{ min-width: 0; }
+    label{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px }
+    /* use box-sizing so padding doesn't add to width; reduce padding slightly to fit */
+    input[type="text"], input[type="date"], input[type="number"], textarea, select{
+      box-sizing: border-box;
+      width:100%; background:#1e1738; color:var(--text); border:1px solid rgba(167,139,250,.12); border-radius:12px; padding:8px; outline:none;
+    }
+    textarea{ min-height:90px; resize:vertical }
+
+    .side-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 12px }
+    .search{ flex:1 }
+    .search input{ width:100%; background:#1a1430; border:1px solid rgba(167,139,250,.10); border-radius:12px; padding:10px; color:var(--text) }
+
+    .empty{ opacity:.9; text-align:center; padding:20px; color:var(--muted) }
+
+    /* Mobile */
+    .mobile-actions{ display:none }
+    @media (max-width: 960px){
+      .app{ grid-template-columns: 1fr; }
+      .mobile-actions{ display:flex; gap:8px; margin-top:10px }
+      #sidebar{ display:none }
+      #sidebar.open{ display:block }
+      #map{ height: 64vh }
+    }
+
+    /* Prevent search input from overflowing the header on small widths */
+    .side-header .search { min-width: 0; flex: 1 1 auto; }
+    .side-header .search input { min-width: 0; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap" style="display:flex; gap:14px; align-items:center; flex-wrap:wrap">
+      <div class="title">
+        <div class="logo" aria-hidden="true">
+          <!-- use provided image.png as the logo -->
+          <img src="image.png" alt="World icon" style="width:28px;height:28px;object-fit:contain;display:block;border-radius:8px" />
+        </div>
+        <div>
+          <div style="font-weight:800; letter-spacing:.3px">Visited Countries</div>
+        </div>
+      </div>
+      <div class="toolbar" style="margin-left:auto">
+        <!-- header toolbar intentionally left minimal; export/import moved to footer -->
+      </div>
+    </div>
+  </header>
+
+  <main class="app">
+    <section id="mapPanel" class="panel">
+      <h2>World Map - click a country and add your memories including photos</h2>
+      <div class="content map-wrap">
+        <svg id="map" role="img" aria-label="World map – click a country to add a trip"></svg>
+        <div class="map-legend">
+          <div><span class="swatch" style="background:#71e8b6"></span>Visited</div>
+          <div><span class="swatch" style="background:var(--not-visited)"></span>Not visited</div>
+        </div>
+        <div class="mobile-actions">
+          <button id="toggleSidebar">Show Trips</button>
+        </div>
+      </div>
+    </section>
+
+    <aside id="sidebar" class="panel">
+      <div class="side-header">
+        <h2 style="margin:0">Trips</h2>
+        <div class="search"><input id="search" placeholder="Search country or notes…" /></div>
+      </div>
+      <div id="tripList" class="content"></div>
+    </aside>
+  </main>
+
+  <!-- Trip Editor Modal -->
+  <dialog id="tripModal">
+    <form id="tripForm" method="dialog">
+      <h3 id="modalTitle" style="margin:0 0 8px 0">Add Trip</h3>
+      <div id="countryLabel" class="meta" style="margin-bottom:10px"></div>
+      <input type="hidden" id="countryId">
+      <input type="hidden" id="editKey"> <!-- countryId:index if editing -->
+      <div class="grid">
+        <div>
+          <label for="tripDate">Date</label>
+          <input type="date" id="tripDate" required>
+        </div>
+        <div>
+          <label for="tripRating">Rating (1–10)</label>
+          <input type="number" id="tripRating" min="1" max="10" value="7" required>
+        </div>
+        <!-- added duration input -->
+        <div>
+          <label for="tripDays">Duration (days)</label>
+          <input type="number" id="tripDays" min="1" value="1" required>
+        </div>
+      </div>
+
+      <!-- Photos section: upload + previews -->
+      <div style="margin-top:10px">
+        <label for="tripPhoto">Photos</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="file" id="tripPhoto" accept="image/*" multiple>
+          <div style="font-size:12px;color:var(--muted)">Photos are stored locally and included with exported data.</div>
+        </div>
+        <div id="photoPreview" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap"></div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label for="tripNotes">Notes / Summary</label>
+        <textarea id="tripNotes" placeholder="What made this trip memorable?"></textarea>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
+        <button type="button" class="ghost" id="cancelModal">Cancel</button>
+        <button id="saveBtn" type="submit">Add trip</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Footer counters (moved to bottom of the page) -->
+  <div id="countersFooter" style="max-width:1200px;margin:18px auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex; align-items:center; gap:8px; justify-content:space-between;">
+      <div style="display:flex; gap:8px; align-items:center">
+        <input id="importInput" type="file" accept="application/json" hidden>
+        <button id="exportBtn" title="Download your data as JSON">Export</button>
+        <button id="importBtn" class="flat" title="Import a previously exported JSON">Import</button>
+        <button id="clearBtn" class="ghost" title="Clear stored trips and photos">Clear all data</button>
+      </div>
+      <div></div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="badge" style="background: rgba(124,58,237,.25); color:var(--text)">Visited: <strong id="cntTotal">0</strong></div>
+      <div id="cntByContinent" style="display:flex; gap:8px; flex-wrap:wrap"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // --- Imports (ESM via CDN) ---
+    import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+    import { feature } from 'https://cdn.jsdelivr.net/npm/topojson-client@3/+esm';
+
+    // --- State & Storage ---
+    const LS_KEY = 'visitedTripsV1';
+    const MAX_PHOTOS = 3; // limit photos per country
+    // continent labels (ISO continent code -> readable)
+    const CONTINENT_LABELS = { AF:'Africa', AN:'Antarctica', AS:'Asia', EU:'Europe', NA:'North America', OC:'Oceania', SA:'South America' };
+    let nameToContinent = new Map(); // normalized country name -> continent code
+    const continentById = new Map(); // topojson id -> continent code (computed from centroid)
+    let totalCountries = 0;
+    let continentTotals = {}; // { EU: 50, AS: ... }
+    /** trips shape: { [countryId]: { visits: Array<{date, rating, days, notes}>, photos: Array<dataUrl> } } */
+    let trips = loadTrips();
+
+    function loadTrips(){
+      try {
+        const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+        // Normalize any simple-array legacy shape into the new {visits, photos} shape.
+        for(const [k, v] of Object.entries(raw)){
+          if(Array.isArray(v)){
+            raw[k] = { visits: v, photos: [] };
+          }else if(v && !v.visits){
+            // ensure object has visits/photos
+            raw[k] = { visits: [], photos: Array.isArray(v.photos) ? v.photos : [] };
+          }
+        }
+        return raw;
+      }catch { return {}; }
+    }
+    function saveTrips(){ localStorage.setItem(LS_KEY, JSON.stringify(trips)); }
+
+    // --- Elements ---
+    const svg = d3.select('#map');
+    const g = svg.append('g');
+
+    // --- Add zoom/pan behavior ---
+    const zoom = d3.zoom()
+      .scaleExtent([1, 8]) // min/max zoom
+      .on('zoom', (event) => g.attr('transform', event.transform));
+    svg.call(zoom); // enable mouse wheel / touch pinch / drag
+
+    // small cursor feedback while dragging
+    svg.on('mousedown touchstart', () => svg.style('cursor', 'grabbing'));
+    svg.on('mouseup touchend touchcancel', () => svg.style('cursor', 'grab'));
+
+    const tripListEl = document.getElementById('tripList');
+
+    const modal = document.getElementById('tripModal');
+    const form = document.getElementById('tripForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const countryLabel = document.getElementById('countryLabel');
+    const countryIdInput = document.getElementById('countryId');
+    const editKeyInput = document.getElementById('editKey');
+    const saveBtn = document.getElementById('saveBtn');
+    const toggleSidebarBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+
+    // photo elements must be referenced before wiring their handlers
+    const tripPhotoInput = document.getElementById('tripPhoto');
+    const photoPreviewEl = document.getElementById('photoPreview');
+    // photos staged for the currently open modal (per-trip)
+    let currentModalPhotos = [];
+
+    // render photo thumbnails for the modal using the staged trip photos (currentModalPhotos)
+    // defined early so modal open / reset can always call it
+    function renderPhotoPreview(countryId){
+      photoPreviewEl.innerHTML = '';
+      // prefer current modal (per-trip) photos; fallback to legacy country photos if no staged photos
+      const photos = (Array.isArray(currentModalPhotos) && currentModalPhotos.length>0)
+        ? currentModalPhotos
+        : ((trips[countryId] && Array.isArray(trips[countryId].photos) && trips[countryId].photos.length>0) ? trips[countryId].photos : []);
+      photos.forEach((dataUrl, idx)=>{
+        const wrap = document.createElement('div');
+        wrap.style.position = 'relative';
+        wrap.style.width = '88px';
+        wrap.style.height = '64px';
+        wrap.style.borderRadius = '8px';
+        wrap.style.overflow = 'hidden';
+        wrap.style.background = '#0b0720';
+        wrap.style.display = 'inline-block';
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.display = 'block';
+        img.title = 'Click to open full image';
+        img.addEventListener('click', ()=> window.open(dataUrl, '_blank'));
+        const rem = document.createElement('button');
+        rem.type = 'button';
+        rem.textContent = '✕';
+        rem.title = 'Remove photo';
+        rem.style.position = 'absolute';
+        rem.style.right = '6px';
+        rem.style.top = '6px';
+        rem.style.border = '0';
+        rem.style.background = 'rgba(0,0,0,.5)';
+        rem.style.color = 'white';
+        rem.style.borderRadius = '50%';
+        rem.style.width = '22px';
+        rem.style.height = '22px';
+        rem.style.cursor = 'pointer';
+        rem.addEventListener('click', ()=>{
+          if(!confirm('Remove this photo from the trip?')) return;
+          // remove from staged modal photos if present, otherwise remove from legacy country photos
+          if(Array.isArray(currentModalPhotos) && currentModalPhotos.length > 0){
+            currentModalPhotos.splice(idx, 1);
+          }else if(trips[countryId] && Array.isArray(trips[countryId].photos)){
+            trips[countryId].photos.splice(idx, 1);
+            saveTrips();
+          }
+          renderPhotoPreview(countryId);
+        });
+        wrap.appendChild(img);
+        wrap.appendChild(rem);
+        photoPreviewEl.appendChild(wrap);
+      });
+      if(photos.length===0){
+        photoPreviewEl.innerHTML = `<div style="color:var(--muted); font-size:12px">No photos for this trip yet.</div>`;
+      }
+    }
+
+    // Toolbar actions
+    document.getElementById('exportBtn').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(trips, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'visited-countries-trips.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+    document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importInput').click());
+    document.getElementById('importInput').addEventListener('change', async (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if(typeof data !== 'object') throw new Error('Invalid file');
+        trips = data; saveTrips();
+        renderAll();
+      }catch(err){ alert('Import failed: ' + err.message) }
+      e.target.value = '';
+    });
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      if(confirm('Clear all saved trips and photos? This action cannot be undone.')) {
+        trips = {}; saveTrips(); renderAll();
+      }
+    });
+
+    toggleSidebarBtn?.addEventListener('click', ()=>{
+      sidebar.classList.toggle('open');
+      toggleSidebarBtn.textContent = sidebar.classList.contains('open') ? 'Hide Trips' : 'Show Trips';
+    });
+
+    // --- Map rendering ---
+    const projection = d3.geoMercator();
+    const path = d3.geoPath(projection);
+
+    let countryNameById = new Map();
+    let countriesFeat = null;
+
+    // helper to get a readable country name from various sources
+    function getCountryName(id){
+      // Try CSV map (string and numeric), then feature properties if available
+      const s = String(id);
+      if(countryNameById.has(s)) return countryNameById.get(s);
+      const n = Number(id);
+      if(!Number.isNaN(n) && countryNameById.has(n)) return countryNameById.get(n);
+      if(countriesFeat){
+        const f = countriesFeat.features.find(ff => String(ff.id) === s || Number(ff.id) === n);
+        if(f && f.properties && f.properties.name) return f.properties.name;
+      }
+      return `Country ${s}`;
+    }
+
+    async function loadMap(){
+      // world-atlas provides TopoJSON with numeric country ids. We'll also fetch a CSV mapping to names.
+      const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json());
+      const names = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/country-names.csv').then(r=>r.text());
+      // build map (store both string and numeric keys as a convenience)
+      d3.csvParse(names).forEach(row=>{
+        countryNameById.set(String(row.id), row.name);
+        const num = Number(row.id);
+        if(!Number.isNaN(num)) countryNameById.set(num, row.name);
+      });
+      countriesFeat = feature(world, world.objects.countries);
+      // populate feature.properties.name so we can always read it
+      countriesFeat.features.forEach(f=>{
+        f.properties = f.properties || {};
+        f.properties.name = countryNameById.get(String(f.id)) || countryNameById.get(Number(f.id)) || f.properties.name || `Country ${f.id}`;
+      });
+      // compute centroid-based continent for each country feature (best-effort)
+      countriesFeat.features.forEach(f=>{
+        try{
+          const c = d3.geoCentroid(f); // [lon, lat]
+          const code = getContinentFromCoords(c[0], c[1]);
+          continentById.set(String(f.id), code);
+        }catch(e){
+          // ignore; continentById will remain empty for this id and fallback will be used
+        }
+      });
+      // build totals per-continent and total countries
+      totalCountries = countriesFeat.features.length;
+      continentTotals = {};
+      countriesFeat.features.forEach(f=>{
+        const id = String(f.id);
+        const code = continentById.get(id) || (nameToContinent.get(normalizeName(f.properties?.name || '')) || 'Unknown');
+        continentTotals[code] = (continentTotals[code] || 0) + 1;
+      });
+      draw();
+      window.addEventListener('resize', draw);
+
+      // render after map+centroid processing — updateCounters will use continentById first
+      renderAll();
+    }
+
+    // Heuristic continent detection from lon/lat (best-effort bounding boxes)
+    function getContinentFromCoords(lon, lat){
+      if(lat <= -60) return 'AN';
+      // Oceania (Australia + Pacific)
+      if(lon >= 110 && lon <= 180 && lat <= 10 && lat >= -50) return 'OC';
+      // Asia (broad)
+      if(lon > 40 && lon <= 180 && lat >= -11 && lat <= 81) return 'AS';
+      // Europe
+      if(lon >= -31 && lon <= 40 && lat >= 34 && lat <= 72) return 'EU';
+      // Africa
+      if(lon >= -20 && lon <= 55 && lat >= -35 && lat <= 38) return 'AF';
+      // North America (including Greenland)
+      if(lon >= -170 && lon <= -30 && lat >= 5 && lat <= 83) return 'NA';
+      // South America
+      if(lon >= -82 && lon <= -34 && lat >= -56 && lat <= 13) return 'SA';
+      // fallback unknown
+      return 'Unknown';
+    }
+
+    function draw(){
+      if(!countriesFeat) return;
+      const wrap = document.querySelector('#mapPanel .content');
+      const w = wrap.clientWidth - 4; // padding
+      const h = Math.min(680, Math.max(360, Math.round(w * 0.52)));
+      svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
+
+      projection.fitExtent([[10,10],[w-10, h-10]], countriesFeat);
+
+      const paths = g.selectAll('path.country').data(countriesFeat.features, d=>d.id);
+      const entered = paths.enter().append('path')
+        .attr('class', d=> 'country'+(hasTrips(d.id)?' visited':''))
+        .attr('d', path)
+        .on('click', (_, d)=> openModalForCountry(d.id));
+
+      // add accessible hover title on enter
+      entered.append('title').text(d => getCountryName(d.id));
+
+      // update selection: path shape, classes and title
+      paths
+        .attr('class', d=> 'country'+(hasTrips(d.id)?' visited':''))
+        .attr('d', path)
+        .select('title').text(d => getCountryName(d.id));
+
+      paths.exit().remove();
+    }
+
+    function hasTrips(countryId){
+      const entry = trips[String(countryId)];
+      return !!(entry && Array.isArray(entry.visits) && entry.visits.length > 0);
+    }
+
+    function openModalForCountry(id, editIndex = null){
+      const name = getCountryName(id);
+      const entry = trips[String(id)] || { visits: [], photos: [] };
+      const count = (entry.visits || []).length;
+      countryIdInput.value = String(id);
+
+      // If editing a specific visit, show edit mode; otherwise add mode.
+      if(editIndex !== null){
+        editKeyInput.value = `${id}:${editIndex}`;
+        const t = (entry.visits || [])[editIndex] || {};
+        document.getElementById('tripDate').value = t.date || '';
+        document.getElementById('tripRating').value = t.rating ?? 7;
+        document.getElementById('tripDays').value = t.days ?? 1;
+        document.getElementById('tripNotes').value = t.notes || '';
+        // preload photos for this trip (if any)
+        currentModalPhotos = Array.isArray(t.photos) ? t.photos.slice() : [];
+        // Clear confusion: explicit edit title and button text
+        modalTitle.textContent = `Edit trip — ${name}`;
+        countryLabel.textContent = `Country: ${name} — Editing trip ${Number(editIndex)+1} of ${count}`;
+        saveBtn.textContent = 'Save changes';
+      } else {
+        editKeyInput.value = '';
+        document.getElementById('tripDate').value = '';
+        document.getElementById('tripRating').value = 7;
+        document.getElementById('tripDays').value = 1;
+        document.getElementById('tripNotes').value = '';
+        // clear staged photos for a new trip
+        currentModalPhotos = [];
+        modalTitle.textContent = `Add trip — ${name}`;
+        countryLabel.textContent = `Country: ${name} — Adding new trip (${count} existing)`;
+        saveBtn.textContent = 'Add trip';
+      }
+
+      // render modal preview
+      renderPhotoPreview(String(id));
+      modal.showModal();
+    }
+
+    // When photo input changes, read files into the modal's staged photos (per-trip), enforce MAX_PHOTOS
+    tripPhotoInput?.addEventListener('change', async (e)=>{
+      const files = Array.from(e.target.files || []);
+      if(!files.length) return;
+      try{
+        const remaining = Math.max(0, MAX_PHOTOS - currentModalPhotos.length);
+        if(remaining <= 0){
+          alert(`Maximum ${MAX_PHOTOS} photos allowed per trip.`);
+        }else{
+          const filesToRead = files.slice(0, remaining);
+          const dataUrls = await readFilesAsDataURLs(filesToRead);
+          currentModalPhotos.push(...dataUrls);
+          if(files.length > remaining){
+            alert(`Added ${remaining} photo(s). Maximum ${MAX_PHOTOS} photos allowed per trip.`);
+          }
+          // update preview after adding staged photos
+          renderPhotoPreview(countryIdInput.value);
+        }
+      }catch(err){
+        alert('Failed to add photos: ' + err.message);
+      }
+      e.target.value = ''; // clear selection
+    });
+
+    // Reset modal fields (used for Cancel)
+    function resetModalFields(){
+      editKeyInput.value = '';
+      document.getElementById('tripDate').value = '';
+      document.getElementById('tripRating').value = 7;
+      document.getElementById('tripDays').value = 1;
+      document.getElementById('tripNotes').value = '';
+      // clear staged modal photos
+      currentModalPhotos = [];
+      // refresh photo preview (will show "No photos" for modal)
+      renderPhotoPreview(countryIdInput.value);
+    }
+    // Cancel button: close modal and discard in-modal edits
+    document.getElementById('cancelModal').addEventListener('click', ()=>{
+      resetModalFields();
+      modal.close();
+    });
+
+    // helper to read files as data URLs and attach to country photos
+    // Compress image file via canvas and return a JPEG data URL.
+    // maxDim: maximum width/height in pixels; quality: 0..1 JPEG quality.
+    function compressImageFile(file, maxDim = 1600, quality = 0.75){
+      return new Promise((resolve, reject)=>{
+        if(!(file instanceof Blob)) return reject(new Error('Not a file'));
+        const img = new Image();
+        img.onload = ()=>{
+          try{
+            const iw = img.naturalWidth || img.width;
+            const ih = img.naturalHeight || img.height;
+            const max = Math.max(iw, ih);
+            const ratio = max > 0 ? Math.min(1, maxDim / max) : 1;
+            const cw = Math.max(1, Math.round(iw * ratio));
+            const ch = Math.max(1, Math.round(ih * ratio));
+            const canvas = document.createElement('canvas');
+            canvas.width = cw; canvas.height = ch;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, cw, ch);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            URL.revokeObjectURL(img.src);
+            resolve(dataUrl);
+          }catch(err){
+            URL.revokeObjectURL(img.src);
+            reject(err);
+          }
+        };
+        img.onerror = ()=> {
+          URL.revokeObjectURL(img.src);
+          reject(new Error('Failed to load image'));
+        };
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    // Read files as (optionally compressed) data URLs. Images are compressed to reduce size.
+    function readFilesAsDataURLs(files){
+      const arr = Array.from(files || []);
+      return Promise.all(arr.map(f=>{
+        if(!f || !f.type || !f.type.startsWith('image/')){
+          // fallback: read as original data URL
+          return new Promise((resolve, reject)=>{
+            const r = new FileReader();
+            r.onerror = ()=> reject(new Error('Failed to read file'));
+            r.onload = ()=> resolve(String(r.result));
+            r.readAsDataURL(f);
+          });
+        }
+        // compress images (max dimension 1600px, quality 0.75)
+        return compressImageFile(f, 1600, 0.75);
+      }));
+    }
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const id = countryIdInput.value;
+      const entry = {
+        date: (document.getElementById('tripDate').value||'').trim(),
+        rating: Number(document.getElementById('tripRating').value||'0'),
+        days: Math.max(1, Math.floor(Number(document.getElementById('tripDays').value||'1'))),
+        notes: (document.getElementById('tripNotes').value||'').trim(),
+        photos: Array.isArray(currentModalPhotos) ? currentModalPhotos.slice() : []
+      };
+      if(!entry.date || !(entry.rating>=1 && entry.rating<=10) || !(entry.days>=1)){
+        alert('Please provide a date, a rating between 1 and 10, and duration of at least 1 day.');
+        return;
+      }
+      // ensure new shape
+      trips[id] = trips[id] || { visits: [], photos: [] };
+      const key = editKeyInput.value;
+      if(key){
+        const [, idxStr] = key.split(':');
+        trips[id].visits[Number(idxStr)] = entry;
+      }else{
+        // allow multiple visits: always push new entries
+        trips[id].visits.push(entry);
+      }
+      saveTrips();
+      // clear staged photos after save
+      currentModalPhotos = [];
+      modal.close();
+      renderAll();
+    });
+
+    // --- Sidebar rendering (iterate visits inside country objects) ---
+    function renderTripsList(filter=''){
+      const query = filter.trim().toLowerCase();
+      const items = [];
+      for(const [id, obj] of Object.entries(trips)){
+        if(!obj) continue;
+        const visits = obj.visits || [];
+        if(!Array.isArray(visits) || visits.length === 0) continue;
+        const name = getCountryName(id);
+        visits.forEach((t, idx)=> items.push({ id, idx, name, ...t }));
+      }
+      // Sort by date desc, then name
+      items.sort((a,b)=> (b.date||'').localeCompare(a.date||'') || a.name.localeCompare(b.name));
+
+      const filtered = query ? items.filter(it=>
+        it.name.toLowerCase().includes(query) || (it.notes||'').toLowerCase().includes(query)
+      ) : items;
+
+      if(filtered.length===0){
+        tripListEl.innerHTML = `<div class="empty">No trips yet. Use the map to add your trips.</div>`;
+        return;
+      }
+
+      tripListEl.innerHTML = filtered.map(it=>{
+        const dateStr = it.date ? new Date(it.date).toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'}) : 'No date';
+        const notes = it.notes ? it.notes.replace(/</g,'&lt;') : '';
+        const daysLabel = it.days ? `${it.days} day${it.days===1?'':'s'}` : '—';
+        // thumbnails: prefer trip-specific photos (it.photos), otherwise fallback to legacy country photos
+        const photos = (it.photos && it.photos.length) ? it.photos.slice(0, MAX_PHOTOS)
+                      : ((trips[it.id] && trips[it.id].photos) ? trips[it.id].photos.slice(0, MAX_PHOTOS) : []);
+        const thumbHtml = photos.length
+          ? photos.map(p=> `<img src="${p}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;margin-right:6px" />`).join('')
+          : '';
+        return `
+          <div class="card" data-key="${it.id}:${it.idx}">
+            <div class="row" style="justify-content:space-between">
+              <div style="font-weight:700; display:flex; align-items:center">
+                ${thumbHtml}
+                <div>${it.name}</div>
+              </div>
+              <div class="meta">${dateStr}</div>
+            </div>
+            <div class="row" style="margin:6px 0">
+              <span class="badge rating">Rating: ${it.rating}/10</span>
+              <span class="badge">Duration: ${daysLabel}</span>
+              <span class="badge">Trips to this country: ${(trips[it.id] && trips[it.id].visits) ? (trips[it.id].visits.length) : 0}</span>
+            </div>
+            <div class="meta" style="white-space:pre-wrap">${notes || '<em>No notes</em>'}</div>
+            <div class="row" style="justify-content:flex-end; margin-top:10px">
+              <button class="flat" data-action="edit">Edit</button>
+              <button class="ghost" data-action="focus">Focus on map</button>
+              <button class="danger" data-action="delete">Delete</button>
+            </div>
+          </div>`;
+      }).join('');
+
+      // Bind buttons
+      tripListEl.querySelectorAll('.card').forEach(card=>{
+        const [countryId, indexStr] = card.dataset.key.split(':');
+        const idx = Number(indexStr);
+        card.querySelector('[data-action="edit"]').addEventListener('click', ()=> openModalForCountry(countryId, idx));
+        card.querySelector('[data-action="delete"]').addEventListener('click', ()=> deleteTrip(countryId, idx));
+        card.querySelector('[data-action="focus"]').addEventListener('click', ()=> focusCountry(countryId));
+      });
+    }
+
+    function deleteTrip(countryId, idx){
+      const name = getCountryName(String(countryId)) || 'this country';
+      if(!confirm(`Delete this trip entry for ${name}?`)) return;
+      if(!trips[countryId]) return;
+      const visits = trips[countryId].visits || [];
+      visits.splice(idx,1);
+
+      // keep photos even if visits become zero; if no visits and no photos, remove key
+      const photos = trips[countryId].photos || [];
+      if(visits.length===0 && (!photos || photos.length===0)){
+        delete trips[countryId];
+      }else{
+        trips[countryId].visits = visits;
+      }
+      saveTrips();
+      renderAll();
+    }
+
+    function focusCountry(countryId){
+      const sel = g.selectAll('path.country').filter(d=> String(d.id)===String(countryId));
+      if(!sel.node()) return;
+      const bounds = path.bounds(sel.datum());
+      const [[x0,y0],[x1,y1]] = bounds;
+      const pad = 20;
+      const vb = svg.attr('viewBox').split(' ').map(Number);
+      const W = vb[2], H = vb[3];
+      const dx = x1 - x0, dy = y1 - y0;
+      const cx = (x0 + x1)/2, cy = (y0 + y1)/2;
+      const scale = Math.min(W/(dx + pad*2), H/(dy + pad*2));
+      // Build d3 transform: translate to center, scale, translate to place country center at origin
+      const t = d3.zoomIdentity.translate(W/2, H/2).scale(scale).translate(-cx, -cy);
+      // apply focus and keep it until user interacts (no automatic reset)
+      svg.transition().duration(600).call(zoom.transform, t);
+    }
+
+    // Search
+    document.getElementById('search').addEventListener('input', (e)=> renderTripsList(e.target.value));
+
+    // update counters UI: show visited / total for overall and per-continent
+    function updateCounters(){
+      const cntEl = document.getElementById('cntTotal');
+      const byContEl = document.getElementById('cntByContinent');
+      const counts = { totalVisitedCountries: 0, byContVisited: {} };
+      for(const [cid, obj] of Object.entries(trips)){
+        const visits = (obj && Array.isArray(obj.visits)) ? obj.visits : [];
+        if(!visits.length) continue;
+        counts.totalVisitedCountries += 1; // unique countries visited
+        const centroidCont = continentById.get(String(cid));
+        let cont = centroidCont;
+        if(!cont || cont === 'Unknown'){
+          const cname = getCountryName(cid);
+          const norm = normalizeName(cname);
+          cont = nameToContinent.get(norm) || cont || 'Unknown';
+        }
+        counts.byContVisited[cont] = (counts.byContVisited[cont] || 0) + 1;
+      }
+      // overall visited / total
+      if(cntEl) cntEl.innerHTML = `${counts.totalVisitedCountries} / ${totalCountries || 0}`;
+      if(byContEl){
+        byContEl.innerHTML = '';
+        const order = ['EU','AS','AF','NA','SA','OC','AN'];
+        order.forEach(code=>{
+          const visited = counts.byContVisited[code] || 0;
+          const total = continentTotals[code] || 0;
+          const label = CONTINENT_LABELS[code] || code;
+          const el = document.createElement('div');
+          el.className = 'badge';
+          el.style.background = 'rgba(124,58,237,.12)';
+          el.style.color = 'var(--muted)';
+          el.style.padding = '6px 8px';
+          el.style.borderRadius = '8px';
+          el.innerHTML = `<strong style="color:var(--text);margin-right:6px">${visited}</strong>${label} ${visited}/${total}`;
+          byContEl.appendChild(el);
+        });
+        // unknown bucket
+        const unknownVisited = counts.byContVisited['Unknown'] || 0;
+        const unknownTotal = continentTotals['Unknown'] || 0;
+        if(unknownVisited || unknownTotal){
+          const el = document.createElement('div');
+          el.className = 'badge';
+          el.style.background = 'rgba(124,58,237,.06)';
+          el.style.color = 'var(--muted)';
+          el.style.padding = '6px 8px';
+          el.style.borderRadius = '8px';
+          el.innerHTML = `<strong style="color:var(--text);margin-right:6px">${unknownVisited}</strong>Other ${unknownVisited}/${unknownTotal}`;
+          byContEl.appendChild(el);
+        }
+      }
+    }
+
+    // ensure counters update whenever the list or map is rendered
+    function renderAll(){
+      // Update visited classes
+      g.selectAll('path.country').attr('class', d=> 'country'+(hasTrips(d.id)?' visited':''));
+      renderTripsList(document.getElementById('search').value || '');
+      updateCounters();
+    }
+
+    // Boot: wait for map load then render trips immediately so sidebar shows everything by default
+    loadMap();
+
+    // use the provided image.png as favicon
+    (function setFavicon(){
+      const link = document.getElementById('favicon');
+      if(link){
+        // image.png should be next to this HTML file (src/image.png)
+        link.href = 'image.png';
+      }
+    })();
+  </script>
+</body>
+</html>
