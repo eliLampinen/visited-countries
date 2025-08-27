@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Visited Countries</title>
+  <title>Visited Countries - Your Travel Journal</title>
   <link id="favicon" rel="icon" href="">
   <style>
     :root{
@@ -152,6 +152,82 @@
     /* Prevent search input from overflowing the header on small widths */
     .side-header .search { min-width: 0; flex: 1 1 auto; }
     .side-header .search input { min-width: 0; box-sizing: border-box; }
+
+    /* Photo viewer dialog styles (wider / full-viewport friendly) */
+    dialog.photo-viewer {
+      padding:8px;
+      max-width: 98vw;
+      width: 98vw;
+      border-radius:12px;
+      background: linear-gradient(180deg, #1a1430, #130f25);
+    }
+    dialog.photo-viewer::backdrop { background: rgba(0,0,0,0.7); }
+    .pv-inner {
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      height: calc(80vh);
+      overflow:hidden;
+    }
+    dialog.photo-viewer img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display:block;
+      user-select:none;
+      -webkit-user-drag: none;
+    }
+    .pv-nav {
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      background: rgba(0,0,0,0.35);
+      border:0;
+      color:white;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      z-index:30;
+    }
+    .pv-nav:active{ transform: translateY(-50%) scale(.98) }
+    .pv-prev { left:10px }
+    .pv-next { right:10px }
+    .pv-close {
+      position:absolute;
+      right:10px;
+      top:10px;
+      background: rgba(0,0,0,0.35);
+      border:0;
+      color:white;
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      z-index:40;
+    }
+    .pv-counter{
+      position:absolute;
+      left:50%;
+      bottom:8px;
+      transform:translateX(-50%);
+      color:var(--muted);
+      font-size:13px;
+      background: rgba(0,0,0,0.32);
+      padding:6px 10px;
+      border-radius:999px;
+      z-index:30;
+    }
+    @media (max-width: 560px){
+      dialog.photo-viewer { padding:6px; }
+      .pv-nav { width:34px; height:34px; }
+      .pv-counter{ font-size:12px; padding:5px 8px; }
+    }
   </style>
 </head>
 <body>
@@ -163,7 +239,7 @@
           <img src="image.png" alt="World icon" style="width:28px;height:28px;object-fit:contain;display:block;border-radius:8px" />
         </div>
         <div>
-          <div style="font-weight:800; letter-spacing:.3px">Visited Countries</div>
+          <div style="font-weight:800; letter-spacing:.3px">Visited Countries - Your Travel Journal</div>
         </div>
       </div>
       <div class="toolbar" style="margin-left:auto">
@@ -263,6 +339,17 @@
     </div>
   </dialog>
 
+  <!-- Photo viewer (replaced with carousel + nav; removed "open in new tab") -->
+  <dialog id="photoViewer" class="photo-viewer" aria-label="Photo viewer" role="dialog">
+    <div class="pv-inner" id="pvInner">
+      <button id="pvPrev" class="pv-nav pv-prev" aria-label="Previous photo">‹</button>
+      <img id="photoViewerImg" alt="Photo preview" src="" draggable="false" />
+      <button id="pvNext" class="pv-nav pv-next" aria-label="Next photo">›</button>
+      <button id="closePhotoViewer" class="pv-close" aria-label="Close viewer">Close</button>
+      <div id="pvCounter" class="pv-counter" aria-hidden="true"></div>
+    </div>
+  </dialog>
+
   <!-- Footer counters (moved to bottom of the page) -->
   <div id="countersFooter" style="max-width:1200px;margin:18px auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
     <div style="display:flex; align-items:center; gap:8px; justify-content:space-between;">
@@ -353,8 +440,90 @@
     // photos staged for the currently open modal (per-trip)
     let currentModalPhotos = [];
 
-    // render photo thumbnails for the modal using the staged trip photos (currentModalPhotos)
-    // defined early so modal open / reset can always call it
+    // --- Photo viewer carousel state & helpers ---
+    let viewerPhotos = [];
+    let viewerIndex = 0;
+    const viewerDialog = document.getElementById('photoViewer');
+    const viewerImg = document.getElementById('photoViewerImg');
+    const pvPrev = document.getElementById('pvPrev');
+    const pvNext = document.getElementById('pvNext');
+    const pvClose = document.getElementById('closePhotoViewer');
+    const pvCounter = document.getElementById('pvCounter');
+    const pvInner = document.getElementById('pvInner');
+
+    function updateViewer(){
+      if(!viewerDialog) return;
+      if(!viewerPhotos || viewerPhotos.length===0){
+        viewerImg.src = '';
+        pvCounter.textContent = '';
+        pvPrev.style.display = 'none';
+        pvNext.style.display = 'none';
+        return;
+      }
+      // clamp index
+      if(viewerIndex < 0) viewerIndex = 0;
+      if(viewerIndex >= viewerPhotos.length) viewerIndex = viewerPhotos.length - 1;
+      viewerImg.src = viewerPhotos[viewerIndex] || '';
+      pvCounter.textContent = `${viewerIndex + 1} / ${viewerPhotos.length}`;
+      pvPrev.style.display = (viewerPhotos.length > 1 && viewerIndex > 0) ? 'grid' : (viewerPhotos.length>1 ? 'grid' : 'none');
+      pvNext.style.display = (viewerPhotos.length > 1 && viewerIndex < viewerPhotos.length - 1) ? 'grid' : (viewerPhotos.length>1 ? 'grid' : 'none');
+    }
+
+    function showPhotoViewer(photosArray = [], startIndex = 0){
+      // accept single string too
+      if(!Array.isArray(photosArray)) photosArray = [String(photosArray || '')];
+      viewerPhotos = photosArray.slice();
+      viewerIndex = Math.max(0, Math.min(startIndex || 0, viewerPhotos.length - 1));
+      updateViewer();
+      viewerDialog.showModal();
+      // attach keyboard handler
+      window.addEventListener('keydown', viewerKeyHandler);
+    }
+
+    function closePhotoViewer(){
+      if(!viewerDialog) return;
+      viewerDialog.close();
+      window.removeEventListener('keydown', viewerKeyHandler);
+      // clear image to free memory
+      viewerImg.src = '';
+      viewerPhotos = [];
+      viewerIndex = 0;
+    }
+
+    function viewerKeyHandler(e){
+      if(!viewerDialog || !viewerDialog.open) return;
+      if(e.key === 'ArrowLeft') { e.preventDefault(); if(viewerIndex > 0){ viewerIndex -= 1; updateViewer(); } }
+      else if(e.key === 'ArrowRight') { e.preventDefault(); if(viewerIndex < viewerPhotos.length - 1){ viewerIndex += 1; updateViewer(); } }
+      else if(e.key === 'Escape'){ e.preventDefault(); closePhotoViewer(); }
+    }
+
+    // prev/next click
+    pvPrev.addEventListener('click', ()=> { if(viewerIndex > 0){ viewerIndex -= 1; updateViewer(); } });
+    pvNext.addEventListener('click', ()=> { if(viewerIndex < viewerPhotos.length - 1){ viewerIndex += 1; updateViewer(); } });
+    pvClose.addEventListener('click', closePhotoViewer);
+    // clicking backdrop closes viewer
+    viewerDialog.addEventListener('click', (ev)=> { if(ev.target === viewerDialog) closePhotoViewer(); });
+
+    // touch swipe support (simple)
+    (function wireSwipe(){
+      let startX = null, deltaX = 0;
+      pvInner.addEventListener('touchstart', (ev)=> { startX = ev.touches && ev.touches[0] ? ev.touches[0].clientX : null; deltaX = 0; });
+      pvInner.addEventListener('touchmove', (ev)=> {
+        if(startX === null) return;
+        const x = ev.touches && ev.touches[0] ? ev.touches[0].clientX : null;
+        if(x === null) return;
+        deltaX = x - startX;
+      });
+      pvInner.addEventListener('touchend', ()=> {
+        if(startX === null) return;
+        const threshold = 40; // px
+        if(deltaX > threshold){ if(viewerIndex > 0) { viewerIndex -= 1; updateViewer(); } }
+        else if(deltaX < -threshold){ if(viewerIndex < viewerPhotos.length - 1){ viewerIndex += 1; updateViewer(); } }
+        startX = null; deltaX = 0;
+      });
+    })();
+
+    // --- renderPhotoPreview: use the carousel viewer for clicks (and preserve remove behavior) ---
     function renderPhotoPreview(countryId){
       photoPreviewEl.innerHTML = '';
       // prefer current modal (per-trip) photos; fallback to legacy country photos if no staged photos
@@ -364,8 +533,8 @@
       photos.forEach((dataUrl, idx)=>{
         const wrap = document.createElement('div');
         wrap.style.position = 'relative';
-        wrap.style.width = '88px';
-        wrap.style.height = '64px';
+        wrap.style.width = '120px';  // wider thumbnails for easier tapping
+        wrap.style.height = '80px';
         wrap.style.borderRadius = '8px';
         wrap.style.overflow = 'hidden';
         wrap.style.background = '#0b0720';
@@ -376,8 +545,9 @@
         img.style.height = '100%';
         img.style.objectFit = 'cover';
         img.style.display = 'block';
-        img.title = 'Click to open full image';
-        img.addEventListener('click', ()=> window.open(dataUrl, '_blank'));
+        img.title = 'Tap to open full image';
+        // open the carousel at this photo
+        img.addEventListener('click', ()=> showPhotoViewer(photos, idx));
         const rem = document.createElement('button');
         rem.type = 'button';
         rem.textContent = '✕';
@@ -392,7 +562,7 @@
         rem.style.width = '22px';
         rem.style.height = '22px';
         rem.style.cursor = 'pointer';
-        rem.addEventListener('click', ()=>{
+        rem.addEventListener('click', ()=> {
           if(!confirm('Remove this photo from the trip?')) return;
           // remove from staged modal photos if present, otherwise remove from legacy country photos
           if(Array.isArray(currentModalPhotos) && currentModalPhotos.length > 0){
@@ -787,13 +957,32 @@
           </div>`;
       }).join('');
 
-      // Bind buttons
+      // Bind buttons and thumbnail clicks
       tripListEl.querySelectorAll('.card').forEach(card=>{
         const [countryId, indexStr] = card.dataset.key.split(':');
         const idx = Number(indexStr);
         card.querySelector('[data-action="edit"]').addEventListener('click', ()=> openModalForCountry(countryId, idx));
         card.querySelector('[data-action="delete"]').addEventListener('click', ()=> deleteTrip(countryId, idx));
         card.querySelector('[data-action="focus"]').addEventListener('click', ()=> focusCountry(countryId));
+        // compute same photos array used for the card thumbnails:
+        const tripObj = trips[countryId];
+        let photos = [];
+        if(tripObj){
+          const visit = (Array.isArray(tripObj.visits) && tripObj.visits[idx]) ? tripObj.visits[idx] : null;
+          if(visit && Array.isArray(visit.photos) && visit.photos.length) photos = visit.photos.slice(0, MAX_PHOTOS);
+          else if(Array.isArray(tripObj.photos) && tripObj.photos.length) photos = tripObj.photos.slice(0, MAX_PHOTOS);
+        }
+        // bind any thumbnail images inside the card to open the in-page viewer
+        const imgs = Array.from(card.querySelectorAll('img'));
+        imgs.forEach((imgEl, i)=>{
+          imgEl.style.cursor = 'zoom-in';
+          imgEl.addEventListener('click', (ev)=> {
+            ev.stopPropagation();
+            // if photos is empty fallback to single image src
+            if(photos.length) showPhotoViewer(photos, i);
+            else showPhotoViewer([imgEl.src], 0);
+          });
+        });
       });
     }
 
