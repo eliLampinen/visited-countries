@@ -63,8 +63,31 @@
     .app{max-width:1200px; margin:18px auto; padding:0 16px; display:grid; grid-template-columns: 1.6fr .9fr; gap:18px}
     .panel{background: linear-gradient(180deg, var(--card), var(--card-2)); border:1px solid rgba(167,139,250,.12); border-radius:16px; box-shadow: var(--shadow)}
     .panel h2{margin:0; padding:14px 16px; border-bottom:1px solid rgba(167,139,250,.09); font-size:16px; letter-spacing:.3px}
-    .panel .content{padding:12px}
-
+    /* help button */
+    .help-btn{
+      margin-left:8px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:34px;
+      height:34px;
+      padding:6px;
+      border-radius:8px;
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      border:1px solid rgba(167,139,250,.06);
+      cursor:pointer;
+      box-shadow: var(--shadow);
+      font-size:14px;
+    }
+    .help-btn:hover{ background: rgba(255,255,255,.06) }
+    dialog.help-dialog{ padding:14px; max-width:520px; }
+    dialog.help-dialog .title{ font-weight:700; margin-bottom:8px }
+    .content {
+      padding: 16px;
+      border-top: 1px solid rgba(167,139,250,.09);
+      border-bottom: 1px solid rgba(167,139,250,.09);
+    }
     /* Map */
     #map{ width:100%; height:min(70vh, 680px); touch-action: none; cursor: grab; } /* enable touch gestures and show grab cursor */
     .map-wrap{ position:relative; }
@@ -151,7 +174,13 @@
 
   <main class="app">
     <section id="mapPanel" class="panel">
-      <h2>World Map - click a country and add your memories including photos</h2>
+      <h2 style="display:flex;align-items:center;gap:8px">
+        <span>World Map - click a country and add your memories including photos</span>
+        <button id="helpBtn" class="help-btn" aria-label="How this works" title="How this works">
+          <!-- Info icon (local file) -->
+          <img src="info-icon.png" alt="Info" style="width:16px;height:16px;display:block" />
+        </button>
+      </h2>
       <div class="content map-wrap">
         <svg id="map" role="img" aria-label="World map – click a country to add a trip"></svg>
         <div class="map-legend">
@@ -215,6 +244,23 @@
         <button id="saveBtn" type="submit">Add trip</button>
       </div>
     </form>
+  </dialog>
+
+  <!-- Help dialog: persistent, open any time -->
+  <dialog id="helpDialog" class="help-dialog">
+    <div class="title">How to use Visited Countries</div>
+    <div style="font-size:13px; color:var(--muted); margin-bottom:10px">
+      - Click a country on the map to add a trip (date, rating, duration, notes).<br>
+      - You can add multiple visits for the same country.<br>
+      - Upload photos for each trip (stored locally to your browser and included when you export data).<br>
+      - Use Export to download your data as JSON and Import to restore it on any device.<br>
+      - Use the sidebar search to find trips by country or notes.<br>
+      - Clear removes all stored trips and photos from browser data.<br>
+      - Data is stored in your browser's localStorage and persists until you clear it or the browser removes it (e.g. clearing cache); export regularly to back up your trips.
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button id="closeHelp" class="ghost" type="button">Close</button>
+    </div>
   </dialog>
 
   <!-- Footer counters (moved to bottom of the page) -->
@@ -281,6 +327,13 @@
     // small cursor feedback while dragging
     svg.on('mousedown touchstart', () => svg.style('cursor', 'grabbing'));
     svg.on('mouseup touchend touchcancel', () => svg.style('cursor', 'grab'));
+    // Help dialog wiring
+    const helpBtn = document.getElementById('helpBtn');
+    const helpDialog = document.getElementById('helpDialog');
+    const closeHelp = document.getElementById('closeHelp');
+    helpBtn?.addEventListener('click', ()=> helpDialog?.showModal());
+    closeHelp?.addEventListener('click', ()=> helpDialog?.close());
+    helpDialog?.addEventListener('cancel', (e)=> e.preventDefault()); // prevent ESC from closing if you prefer keeping it open — remove if not desired
 
     const tripListEl = document.getElementById('tripList');
 
@@ -480,6 +533,16 @@
       svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
 
       projection.fitExtent([[10,10],[w-10, h-10]], countriesFeat);
+
+      // Tighten pan bounds: compute screen-space bounds of the world feature and use it (adds small padding).
+      try {
+        const [[minX, minY], [maxX, maxY]] = path.bounds(countriesFeat);
+        const pad = Math.max(40, Math.round(Math.min(w,h) * 0.06)); // small padding relative to viewport
+        zoom.translateExtent([[minX - pad, minY - pad], [maxX + pad, maxY + pad]]);
+      } catch (err) {
+        // fallback to a reasonable default if bounds computation fails
+        zoom.translateExtent([[ -w * 0.25, -h * 0.25 ], [ w * 1.25, h * 1.25 ]]);
+      }
 
       const paths = g.selectAll('path.country').data(countriesFeat.features, d=>d.id);
       const entered = paths.enter().append('path')
