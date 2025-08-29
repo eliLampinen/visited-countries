@@ -23,11 +23,72 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Visited Countries - Your Travel Journal",
-    "description": "A personal travel journal to track countries visited, log trips with dates, ratings, duration and notes, and attach photos. Export/import your data and track progress toward visiting all countries.",
-    "image": "image.png"
+    "@type": "WebApplication",
+    "name": "Visited Countries — Your Travel Journal",
+    "applicationCategory": "TravelApplication",
+    "operatingSystem": "Web",
+    "description": "Track countries visited on an interactive world map, log trips with dates, ratings, duration and notes, attach photos, and export/import your travel journal.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": [
+      "Visited countries tracker with world map",
+      "Trip log with dates, rating, duration and notes",
+      "Add and view travel photos (IndexedDB, local only)",
+      "Search trips by country or notes",
+      "Export/Import JSON for easy backup",
+      "Privacy-first: data stored in your browser"
+    ]
   }
+  </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Visited Countries?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Visited Countries is a personal travel journal and country tracker. Mark countries you have visited, add trips with dates, ratings, duration and notes, and attach travel photos."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where is my data stored?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Your trip data is saved in localStorage and your photos are saved locally using IndexedDB. Nothing is uploaded—export your JSON to back up or move devices."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I add photos to my trips?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Add up to three photos per trip. Images are compressed in your browser and stored locally, and they are included when you export your journal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I import or export my travel journal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use Export to download a JSON backup of your visited countries and trips. Use Import to restore that file on any device."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the app work offline?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, your data stays in your browser, so you can view and edit your travel log even without an internet connection."
+      }
+    }
+  ]
+}
+</script>
+
   </script>
   <title>Visited Countries - Your Travel Journal</title>
   <link id="favicon" rel="icon" href="">
@@ -94,13 +155,46 @@
     .help-btn:hover{ background: rgba(255,255,255,.06) }
     dialog.help-dialog{ padding:14px; max-width:520px; }
     dialog.help-dialog .title{ font-weight:700; margin-bottom:8px }
-    .content { padding: 16px; border-top: 1px solid rgba(167,139,250,.09); border-bottom: 1px solid rgba(167,139,250,.09); }
+    .content { 
+      padding: 16px; 
+      border-top: 1px solid rgba(167,139,250,.09); 
+      border-bottom: 1px solid rgba(167,139,250,.09); 
+      overflow-y: auto; /* ensures scrollbars appear if needed */
+    }
+
+    /* Chrome, Edge, Safari */
+    .content::-webkit-scrollbar {
+      width: 10px;               /* scrollbar width */
+      height: 10px;              /* scrollbar height (for horizontal scroll) */
+    }
+
+    .content::-webkit-scrollbar-track {
+      background: #1a1a1a;        /* dark track */
+      border-radius: 8px;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+      background: #333;           /* dark gray thumb */
+      border-radius: 8px;
+    }
+
+    .content::-webkit-scrollbar-thumb:hover {
+      background: #444;           /* slightly lighter on hover */
+    }
+
+    /* Firefox */
+    .content {
+      scrollbar-width: thin;                /* slim scrollbar */
+      scrollbar-color: #333 #1a1a1a;        /* thumb | track */
+    }
+
+
     #map{ width:100%; height:min(70vh, 680px); touch-action: none; cursor: grab; }
     .map-wrap{ position:relative; }
     .map-legend{ position:absolute; right:10px; bottom:10px; background: rgba(21,16,42,.78); border:1px solid rgba(167,139,250,.14); border-radius:12px; padding:10px 12px; font-size:12px}
     .map-legend .swatch{ display:inline-block; width:14px; height:10px; border-radius:3px; margin-right:6px; vertical-align:middle }
 
-    .country{ fill:var(--not-visited); stroke:#8b5cf644; stroke-width:.6; cursor:pointer; transition: fill .15s ease, stroke .2s ease }
+    .country{ fill:var(--not-visited); stroke:#8b5cf644; stroke-width:.6; cursor:pointer; transition: fill .15s ease, stroke .2s ease; vector-effect: non-scaling-stroke; shape-rendering: geometricPrecision; }
     .country:hover{ fill:#4a3a9a }
     .country.visited{ fill:var(--green); stroke:#43b686 }
 
@@ -156,6 +250,13 @@
       .pv-nav { width:34px; height:34px; }
       .pv-counter{ font-size:12px; padding:5px 8px; }
     }
+
+    /* --- ADJUSTED: make Trips sidebar a bit taller to align with map --- */
+    #sidebar{ display:flex; flex-direction: column; }
+    #sidebar .content{ overflow:auto; max-height: min(90vh, 840px); }
+
+    /* --- Under-map summary layout (reuse badge row styles) --- */
+    .visited-country-list{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; background-color: #403a7e; border-radius:10px; padding: 5px;}
   </style>
 </head>
 <body>
@@ -166,13 +267,18 @@
           <img src="image.png" alt="World icon" style="width:28px;height:28px;object-fit:contain;display:block;border-radius:8px" />
         </div>
         <div>
-          <div style="font-weight:800; letter-spacing:.3px">Visited Countries - Your Travel Journal</div>
+          <div style="font-weight:800; letter-spacing:.3px">Visited Countries - Your Travel Journal         
+            <button id="aboutBtn" class="help-btn" style="width:16px;height:16px;padding:2px;border-radius:6px;">
+              <img src="info-icon.png" alt="Info" style="width:8px;height:8px;display:block;margin:auto;" />
+            </button>
+          </div></div>
         </div>
       </div>
       <div class="toolbar" style="margin-left:auto"></div>
     </div>
   </header>
 
+  
   <main class="app">
     <section id="mapPanel" class="panel">
       <h2 style="display:flex;align-items:center;gap:8px">
@@ -187,8 +293,16 @@
           <div><span class="swatch" style="background:#71e8b6"></span>Visited</div>
           <div><span class="swatch" style="background:var(--not-visited)"></span>Not visited</div>
         </div>
-        <div class="mobile-actions">
-          <button id="toggleSidebar">Show Trips</button>
+
+      </div>
+
+      <div class="content">
+        <div class="row" style="display:flex; align-items:center; gap:8px;">
+          <div class="badge" style="background: rgba(124,58,237,.25); color:var(--text)">Visited countries: <strong id="cntTotal">0</strong></div>
+        </div>
+        <div id="summaryByContinent" class="visited-country-list" aria-live="polite"></div>
+        <div class="badge" style="background: rgba(124,58,237,.25); color:var(--text); margin-top:10px; width:fit-content" >
+            Total trips: <strong id="summaryCntTrips">0</strong>
         </div>
       </div>
     </section>
@@ -261,6 +375,32 @@
     </div>
   </dialog>
 
+  <dialog id="aboutDialog" class="help-dialog" aria-labelledby="aboutDialogTitle">
+    <div id="aboutDialogTitle" class="title">About Visited Countries</div>
+
+    <section aria-labelledby="about-travel-journal" style="margin:12px 0 16px 0">
+      <h2 id="about-travel-journal" style="margin:0 0 8px 0; font-size:16px;">About this travel journal</h2>
+      <p style="margin:6px 0; color:#d6d0f5">
+        Visited Countries is a simple, privacy-first <strong>travel journal</strong> and <strong>visited countries tracker</strong>.
+        Click any country on the world map to log a trip with the date, rating, trip duration and notes, then attach your favorite
+        <strong>travel photos</strong>. Use the sidebar search to find trips, and <strong>export/import JSON</strong>
+        to back up your data or move devices. It’s a lightweight <strong>country tracker</strong> designed for fast logging and
+        following your progress on the road to visit all countries.
+      </p>
+      <ul style="margin:8px 0; padding-left:18px; color:#d6d0f5">
+        <li>World map for <em>visited countries</em> at a glance</li>
+        <li>Trip details: date, rating (1–10), duration and notes</li>
+        <li>Attach local photos (IndexedDB); data stays in your browser</li>
+        <li>Search trips by country or note keywords</li>
+        <li>One-click export/import of your travel journal (JSON)</li>
+      </ul>
+    </section>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button id="closeAbout" class="ghost" type="button">Close</button>
+    </div>
+  </dialog>
+
   <!-- Photo viewer -->
   <dialog id="photoViewer" class="photo-viewer" aria-label="Photo viewer" role="dialog">
     <div class="pv-inner" id="pvInner">
@@ -272,7 +412,7 @@
     </div>
   </dialog>
 
-  <!-- Footer -->
+    <!-- Footer -->
   <div id="countersFooter" style="max-width:1200px;margin:18px auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
     <div style="display:flex; align-items:center; gap:8px; justify-content:space-between;">
       <div style="display:flex; gap:8px; align-items:center">
@@ -283,11 +423,13 @@
       </div>
       <div></div>
     </div>
-    <div style="display:flex; align-items:center; gap:10px;">
-      <div class="badge" style="background: rgba(124,58,237,.25); color:var(--text)">Visited: <strong id="cntTotal">0</strong></div>
-      <div id="cntByContinent" style="display:flex; gap:8px; flex-wrap:wrap"></div>
+
+    <!-- Highlighted backup note -->
+    <div style="margin-top:6px;color:#a84f60;font-weight:bold;font-size: 10px;">
+      Export is recommended to back up your data. It will download a file containing your trips and photos which you can import back at any time.
     </div>
   </div>
+
 
   <script type="module">
     // --- Imports (ESM via CDN) ---
@@ -317,7 +459,6 @@
     function loadTrips(){
       try{
         const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-        // Ensure correct shape (no backwards compatibility, just normalize)
         for(const [k, v] of Object.entries(raw)){
           if(!v || !Array.isArray(v.visits)) raw[k] = { visits: [] };
           else {
@@ -520,6 +661,15 @@
     closeHelp?.addEventListener('click', ()=> helpDialog?.close());
     helpDialog?.addEventListener('cancel', (e)=> e.preventDefault());
 
+    const aboutBtn = document.getElementById('aboutBtn');
+    const aboutDialog = document.getElementById('aboutDialog');
+    const closeAbout = document.getElementById('closeAbout');
+
+    aboutBtn?.addEventListener('click', () => aboutDialog?.showModal());
+    closeAbout?.addEventListener('click', () => aboutDialog?.close());
+    aboutDialog?.addEventListener('cancel', (e) => e.preventDefault()); // prevent Esc from closing if you want
+
+
     const tripListEl = document.getElementById('tripList');
     const modal = document.getElementById('tripModal');
     const form = document.getElementById('tripForm');
@@ -608,13 +758,9 @@
       }
     });
 
-    toggleSidebarBtn?.addEventListener('click', ()=>{
-      sidebar.classList.toggle('open');
-      toggleSidebarBtn.textContent = sidebar.classList.contains('open') ? 'Hide Trips' : 'Show Trips';
-    });
 
     // Map rendering
-    const projection = d3.geoMercator();
+    const projection = d3.geoMercator().precision(0.1);
     const path = d3.geoPath(projection);
     let countryNameById = new Map();
     let countriesFeat = null;
@@ -632,7 +778,7 @@
     }
 
     async function loadMap(){
-      const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json());
+      const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(r=>r.json());
       const names = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/country-names.csv').then(r=>r.text());
       d3.csvParse(names).forEach(row=>{
         countryNameById.set(String(row.id), row.name);
@@ -764,7 +910,6 @@
       photoPreviewEl.innerHTML = '';
       currentPreviewEntries = [];
 
-      // Load existing photos (for edit mode) except those marked removed
       const existingIdsEffective = existingPhotoIds.filter(id => !removedExistingIds.has(id));
       const existingRecords = await idbGetPhotosByIds(existingIdsEffective);
       const existingUrls = existingRecords.map(rec => rec?.blob ? URL.createObjectURL(rec.blob) : null);
@@ -775,7 +920,6 @@
         currentPreviewEntries.push({ type:'existing', id, url });
       });
 
-      // Add staged new photos
       for(const blob of stagedNewPhotos){
         const url = URL.createObjectURL(blob);
         currentPreviewEntries.push({ type:'new', blob, url });
@@ -884,22 +1028,18 @@
         const idx = Number(idxStr);
         const visit = trips[id].visits[idx] || { photoIds: [] };
 
-        // Delete removed existing photos
         for(const pid of Array.from(removedExistingIds)) await idbDeletePhoto(pid);
 
-        // Add new photos to IDB
         const tripKey = `${id}:${idx}`;
         for(const blob of stagedNewPhotos){
           const newId = await idbAddPhoto(tripKey, blob);
           visit.photoIds.push(newId);
         }
 
-        // Update metadata (keep only ids that still exist)
         visit.photoIds = visit.photoIds.filter(pid => !removedExistingIds.has(pid));
         visit.date = entry.date; visit.rating = entry.rating; visit.days = entry.days; visit.notes = entry.notes;
         trips[id].visits[idx] = visit;
       } else {
-        // Add mode: first push a visit with no photos to get index
         const newVisit = { date: entry.date, rating: entry.rating, days: entry.days, notes: entry.notes, photoIds: [] };
         trips[id].visits.push(newVisit);
         const idx = trips[id].visits.length - 1;
@@ -938,7 +1078,6 @@
         return;
       }
 
-      // Build cards (thumbnails filled asynchronously)
       tripListEl.innerHTML = filtered.map(it=>{
         const dateStr = it.date ? new Date(it.date).toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'}) : 'No date';
         const notes = it.notes ? it.notes.replace(/</g,'&lt;') : '';
@@ -994,7 +1133,6 @@
             img.style.cursor = 'zoom-in';
             img.addEventListener('click', async (ev)=>{
               ev.stopPropagation();
-              // Open viewer with full set for this visit
               const allRecs = await idbGetPhotosByIds(visit.photoIds || []);
               const allUrls = allRecs.map(r=> r?.blob ? URL.createObjectURL(r.blob) : null).filter(Boolean);
               showPhotoViewer(allUrls, i);
@@ -1011,7 +1149,6 @@
       if(!trips[countryId]) return;
       const visits = trips[countryId].visits || [];
       const visit = visits[idx];
-      // delete photos from IDB
       if(visit && Array.isArray(visit.photoIds)) {
         for(const pid of visit.photoIds) await idbDeletePhoto(pid);
       }
@@ -1040,12 +1177,15 @@
     // Counters
     function updateCounters(){
       const cntEl = document.getElementById('cntTotal');
+      const cntTripsEl = document.getElementById('cntTotalTrips');
       const byContEl = document.getElementById('cntByContinent');
-      const counts = { totalVisitedCountries: 0, byContVisited: {} };
+
+      const counts = { totalVisitedCountries: 0, byContVisited: {}, totalTrips: 0 };
       for(const [cid, obj] of Object.entries(trips)){
         const visits = (obj && Array.isArray(obj.visits)) ? obj.visits : [];
         if(!visits.length) continue;
         counts.totalVisitedCountries += 1;
+        counts.totalTrips += visits.length;
         const centroidCont = continentById.get(String(cid));
         let cont = centroidCont;
         if(!cont || cont === 'Unknown'){
@@ -1055,7 +1195,17 @@
         }
         counts.byContVisited[cont] = (counts.byContVisited[cont] || 0) + 1;
       }
+
       if(cntEl) cntEl.innerHTML = `${counts.totalVisitedCountries} / ${totalCountries || 0}`;
+      if(cntTripsEl) cntTripsEl.textContent = counts.totalTrips;
+
+      // Update under-map summary totals
+      const sc = document.getElementById('summaryCntCountries');
+      const st = document.getElementById('summaryCntTrips');
+      if(sc) sc.textContent = counts.totalVisitedCountries;
+      if(st) st.textContent = counts.totalTrips;
+
+      // Footer continent badges
       if(byContEl){
         byContEl.innerHTML = '';
         const order = ['EU','AS','AF','NA','SA','OC','AN'];
@@ -1084,6 +1234,27 @@
           el.innerHTML = `<strong style="color:var(--text);margin-right:6px">${unknownVisited}</strong>Other ${unknownVisited}/${unknownTotal}`;
           byContEl.appendChild(el);
         }
+      }
+
+      // Under-map continent breakdown
+      const sumCont = document.getElementById('summaryByContinent');
+      if(sumCont){
+        sumCont.innerHTML = '';
+        const order = ['EU','AS','AF','NA','SA','OC','AN'];
+        order.forEach(code=>{
+          const visited = counts.byContVisited[code] || 0;
+          const total = continentTotals[code] || 0;
+          if(total === 0) return;
+          const label = CONTINENT_LABELS[code] || code;
+          const el = document.createElement('div');
+          el.className = 'badge';
+          el.style.background = 'rgba(255,255,255,.16)';
+          el.style.color = 'var(--muted)';
+          el.style.padding = '6px 8px';
+          el.style.borderRadius = '8px';
+          el.innerHTML = `<strong style="color:var(--text);margin-right:6px"></strong>${label} ${visited}/${total}`;
+          sumCont.appendChild(el);
+        });
       }
     }
 
@@ -1129,11 +1300,9 @@
         const text = await file.text();
         const data = JSON.parse(text);
         if(!data || typeof data !== 'object' || !data.trips) throw new Error('Invalid file format');
-        // Clear current data
         trips = {};
         await idbClearAll();
 
-        // Rebuild
         for(const [cid, obj] of Object.entries(data.trips)){
           const visitsIn = Array.isArray(obj?.visits) ? obj.visits : [];
           trips[cid] = { visits: [] };
