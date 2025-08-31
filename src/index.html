@@ -32,7 +32,7 @@
     "featureList": [
       "Visited countries tracker with world map",
       "Trip log with dates, rating, duration and notes",
-      "Add and view travel photos (IndexedDB, local only)",
+      "Add and view travel photos",
       "Search trips by country or notes",
       "Export/Import JSON for easy backup",
       "Privacy-first: data stored in your browser"
@@ -58,7 +58,7 @@
       "name": "Where is my data stored?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Your trip data is saved in localStorage and your photos are saved locally using IndexedDB. Nothing is uploaded—export your JSON to back up or move devices."
+        "text": "Your trip data is saved in localStorage and your photos are saved locally. Nothing is uploaded—export your JSON to back up or move devices."
       }
     },
     {
@@ -267,7 +267,7 @@
           <img src="image.png" alt="World icon" style="width:28px;height:28px;object-fit:contain;display:block;border-radius:8px" />
         </div>
         <div>
-          <div style="font-weight:800; letter-spacing:.3px">Visited Countries - Your Travel Journal         
+          <div style="font-weight:800; letter-spacing:.3px; font-size: 12px;">Visited Countries - Your Travel Journal         
             <button id="aboutBtn" class="help-btn" style="width:16px;height:16px;padding:2px;border-radius:6px;">
               <img src="info-icon.png" alt="Info" style="width:8px;height:8px;display:block;margin:auto;" />
             </button>
@@ -282,7 +282,7 @@
   <main class="app">
     <section id="mapPanel" class="panel">
       <h2 style="display:flex;align-items:center;gap:8px">
-        <span>World Map - click a country and add your memories including photos</span>
+        <span>Click a Country - Add Notes, Ratings & Memories including photos</span>
         <button id="helpBtn" class="help-btn" aria-label="How this works" title="How this works">
           <img src="info-icon.png" alt="Info" style="width:16px;height:16px;display:block" />
         </button>
@@ -342,7 +342,7 @@
         <label for="tripPhoto">Photos</label>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="file" id="tripPhoto" accept="image/*" multiple>
-          <div style="font-size:12px;color:var(--muted)">Photos are stored locally and included with exported data (using IndexedDB under the hood).</div>
+          <div style="font-size:12px;color:var(--muted)"></div>
         </div>
         <div id="photoPreview" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap"></div>
       </div>
@@ -364,7 +364,7 @@
     <div style="font-size:13px; color:var(--muted); margin-bottom:10px">
       - Click a country on the map to add a trip (date, rating, duration, notes).<br>
       - You can add multiple visits for the same country.<br>
-      - Upload photos for each trip; they’re stored locally (IndexedDB) and included when you Export.<br>
+      - Upload photos for each trip; they’re stored locally and included when you Export.<br>
       - Use Export to download your data as JSON and Import to restore it on any device.<br>
       - Use the sidebar search to find trips by country or notes.<br>
       - Clear removes all stored trips and photos from your browser.<br>
@@ -390,10 +390,11 @@
       <ul style="margin:8px 0; padding-left:18px; color:#d6d0f5">
         <li>World map for <em>visited countries</em> at a glance</li>
         <li>Trip details: date, rating (1–10), duration and notes</li>
-        <li>Attach local photos (IndexedDB); data stays in your browser</li>
+        <li>Attach local photos; data stays in your browser</li>
         <li>Search trips by country or note keywords</li>
         <li>One-click export/import of your travel journal (JSON)</li>
       </ul>
+      Suggestions or feedback? Email me at visited.countries.app@gmail.com
     </section>
 
     <div style="display:flex; justify-content:flex-end; gap:8px;">
@@ -436,13 +437,6 @@
     import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
     import { feature } from 'https://cdn.jsdelivr.net/npm/topojson-client@3/+esm';
 
-    // =========================================================
-    // Storage model (Option B)
-    // - localStorage: trips metadata only (no image data)
-    // - IndexedDB: photo blobs (JPEG)
-    // =========================================================
-
-    // ---------- LocalStorage ----------
     const LS_KEY = 'visitedTripsV2';
     const MAX_PHOTOS = 3;
     const CONTINENT_LABELS = { AF:'Africa', AN:'Antarctica', AS:'Asia', EU:'Europe', NA:'North America', OC:'Oceania', SA:'South America' };
@@ -879,7 +873,7 @@
         document.getElementById('tripNotes').value = '';
         existingPhotoIds = [];
         modalTitle.textContent = `Add trip — ${name}`;
-        countryLabel.textContent = `Country: ${name} — Adding new trip (${count} existing)`;
+        countryLabel.textContent = `Country: ${name} — Adding new trip`;
         saveBtn.textContent = 'Add trip';
       }
 
@@ -1099,7 +1093,6 @@
             <div class="meta" style="white-space:pre-wrap">${notes || '<em>No notes</em>'}</div>
             <div class="row" style="justify-content:flex-end; margin-top:10px">
               <button class="flat" data-action="edit">Edit</button>
-              <button class="ghost" data-action="focus">Focus on map</button>
               <button class="danger" data-action="delete">Delete</button>
             </div>
           </div>`;
@@ -1111,7 +1104,6 @@
         const idx = Number(indexStr);
         card.querySelector('[data-action="edit"]').addEventListener('click', ()=> openModalForCountry(countryId, idx));
         card.querySelector('[data-action="delete"]').addEventListener('click', ()=> deleteTrip(countryId, idx));
-        card.querySelector('[data-action="focus"]').addEventListener('click', ()=> focusCountry(countryId));
       });
 
       // Fill thumbnails asynchronously
@@ -1158,21 +1150,7 @@
       renderAll();
     }
 
-    function focusCountry(countryId){
-      const sel = g.selectAll('path.country').filter(d=> String(d.id)===String(countryId));
-      if(!sel.node()) return;
-      const bounds = path.bounds(sel.datum());
-      const [[x0,y0],[x1,y1]] = bounds;
-      const pad = 20;
-      const vb = svg.attr('viewBox').split(' ').map(Number);
-      const W = vb[2], H = vb[3];
-      const dx = x1 - x0, dy = y1 - y0;
-      const cx = (x0 + x1)/2, cy = (y0 + y1)/2;
-      const scale = Math.min(W/(dx + pad*2), H/(dy + pad*2));
-      const clampedScale = Math.min(scale, ZOOM_MAX);
-      const t = d3.zoomIdentity.translate(W/2, H/2).scale(clampedScale).translate(-cx, -cy);
-      svg.transition().duration(600).call(zoom.transform, t);
-    }
+
 
     // Counters
     function updateCounters(){
@@ -1293,7 +1271,6 @@
       URL.revokeObjectURL(a.href);
     }
 
-    // Import (rebuild trips + write photos into IndexedDB)
     async function importAll(e){
       const file = e.target.files?.[0]; if(!file) return;
       try{
